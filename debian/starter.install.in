@@ -1,0 +1,4 @@
+@PREFIX@/bin/*
+@PREFIX@/share/*
+@PREFIX@/lib/*
+/etc/init.d/*

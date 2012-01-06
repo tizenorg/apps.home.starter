@@ -1,0 +1,31 @@
+starter (0.3.42) unstable; urgency=low
+
+  * fix pwlock pkg name
+  * Git: pkgs/s/starter
+  * Tag: starter_0.3.42
+
+ -- Seungtaek Chung <seungtaek.chung@samsung.com>  Thu, 29 Dec 2011 10:26:08 +0900
+
+starter (0.3.41) unstable; urgency=low
+
+  * remove lock screen operation
+  * Git: pkgs/s/starter
+  * Tag: starter_0.3.41
+
+ -- Seungtaek Chung <seungtaek.chung@samsung.com>  Wed, 28 Dec 2011 17:52:53 +0900
+
+starter (0.3.40) unstable; urgency=low
+
+  * update pkgname to org.tizen
+  * Git: pkgs/s/starter
+  * Tag: starter_0.3.40
+
+ -- Mi-Ju Lee <miju52.lee@samsung.com>  Fri, 23 Dec 2011 16:03:47 +0900
+
+starter (0.3.39) unstable; urgency=low
+
+  * Initial released
+  * Git: pkgs/s/starter
+  * Tag: starter_0.3.39
+
+ -- Seungtaek Chung <seungtaek.chung@samsung.com>  Wed, 07 Dec 2011 23:01:58 +0900
