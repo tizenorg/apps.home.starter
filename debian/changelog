@@ -1,3 +1,11 @@
+starter (0.3.43) unstable; urgency=low
+
+  * EFL update
+  * Git: pkgs/s/starter
+  * Tag: starter_0.3.43
+
+ -- Seungtaek Chung <seungtaek.chung@samsung.com>  Fri, 17 Feb 2012 13:21:18 +0900
+
 starter (0.3.42) unstable; urgency=low
 
   * fix pwlock pkg name
