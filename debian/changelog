@@ -1,3 +1,11 @@
+starter (0.3.44) unstable; urgency=low
+
+  * rollback the boilerplate
+  * Git: pkgs/s/starter
+  * Tag: starter_0.3.44
+
+ -- Seungtaek Chung <seungtaek.chung@samsung.com>  Mon, 20 Feb 2012 10:50:12 +0900
+
 starter (0.3.43) unstable; urgency=low
 
   * EFL update
