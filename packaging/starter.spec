@@ -1,9 +1,9 @@
 Name:       starter
 Summary:    starter
-Version:    0.3.44
+Version:    0.4.0
 Release:    1
-Group:      TO_BE/FILLED_IN
-License:    Apache-2.0
+Group:      Apache
+License:    TO_BE/FILLED_IN
 Source0:    starter-%{version}.tar.gz
 Requires(post): /usr/bin/vconftool
 BuildRequires:  cmake
@@ -14,14 +14,10 @@ BuildRequires:  pkgconfig(heynoti)
 BuildRequires:  pkgconfig(aul)
 BuildRequires:  pkgconfig(x11)
 BuildRequires:  pkgconfig(elementary)
-BuildRequires:  pkgconfig(appcore-efl)
 BuildRequires:  pkgconfig(ecore)
 BuildRequires:  pkgconfig(evas)
-BuildRequires:  pkgconfig(ecore-evas)
-BuildRequires:  pkgconfig(eet)
-BuildRequires:  pkgconfig(ecore-input)
 BuildRequires:  pkgconfig(utilX)
-BuildRequires:  pkgconfig(ui-gadget)
+BuildRequires:  pkgconfig(appcore-efl)
 
 %description
 Description: Starter
@@ -30,26 +26,30 @@ Description: Starter
 %prep
 %setup -q
 
+cmake . -DCMAKE_INSTALL_PREFIX=%{_prefix}
 
 %build
-cmake . -DCMAKE_INSTALL_PREFIX=%{_prefix}
-make 
 
+make -j1 
 %install
+rm -rf %{buildroot}
 %make_install
 
 
 %post
 vconftool set -t int "memory/startapps/sequence" 0 -i -u 5000 -g 5000
-vconftool set -t string db/lockscreen/pkgname "org.tizen.idle-lock" -u 5000 -g 5000
+vconftool set -t string db/lockscreen/pkgname "org.tizen.draglock" -u 5000 -g 5000  
 vconftool -i set -t int memory/idle_lock/state "0" -u 5000 -g 5000
 
 ln -sf /etc/init.d/rd4starter /etc/rc.d/rc4.d/S81starter
 ln -sf /etc/init.d/rd3starter /etc/rc.d/rc3.d/S43starter
 
+sync
+
 %files
+%defattr(-,root,root,-)
 %{_sysconfdir}/init.d/rd4starter
 %{_sysconfdir}/init.d/rd3starter
-%{_datadir}/applications/starter.desktop
 %{_bindir}/starter
 %{_libdir}/liblock-daemon.so
+

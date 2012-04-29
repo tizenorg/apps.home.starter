@@ -19,10 +19,25 @@
  *
  */
 
-#ifndef __STARTER_X11_H__
-#define __STARTER_X11_H__
+#ifndef __LOCKD_WINDOW_MGR_H__
+#define __LOCKD_WINDOW_MGR_H__
 
-void prop_string_set(const char *name, const char *value);
-void prop_int_set(const char *name, unsigned int val);
+typedef struct _lockw_data lockw_data;
 
-#endif				/* __STARTER_X11_H__ */
+void lockd_window_set_window_property(lockw_data * data, int lock_app_pid,
+				 void *event);
+
+void lockd_window_set_window_effect(lockw_data * data, int lock_app_pid,
+			       void *event);
+
+void lockd_window_set_phonelock_pid(lockw_data * data, int phone_lock_pid);
+
+void lockd_window_mgr_ready_lock(void *data, lockw_data * lockw,
+			    Eina_Bool(*create_cb) (void *, int, void *),
+			    Eina_Bool(*show_cb) (void *, int, void *));
+
+void lockd_window_mgr_finish_lock(lockw_data * lockw);
+
+lockw_data *lockd_window_init(void);
+
+#endif				/* __LOCKD_WINDOW_MGR_H__ */

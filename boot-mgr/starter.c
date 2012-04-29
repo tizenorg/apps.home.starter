@@ -38,10 +38,6 @@
 #include "lock-daemon.h"
 #include "lockd-debug.h"
 
-#ifndef PACKAGE_NAME
-#define PACKAGE_NAME "org.tizen.starter"
-#endif
-
 #define PWLOCK_PKG "org.tizen.pwlock"
 #define VCONFKEY_START "memory/startapps/sequence"
 #define PWLOCK_FIRST_BOOT "db/setting/pwlock_boot"
@@ -70,14 +66,16 @@ static void _set_elm_theme(void)
 {
 	char *vstr;
 	char *theme;
+	Elm_Theme *th = NULL;
 	vstr = vconf_get_str(VCONFKEY_SETAPPL_WIDGET_THEME_STR);
 	if (vstr == NULL)
 		theme = DEFAULT_THEME;
 	else
 		theme = vstr;
 
+	th = elm_theme_new();
 	_DBG("theme vconf[%s]\n set[%s]\n", vstr, theme);
-	elm_theme_all_set(theme);
+	elm_theme_set(th, theme);
 
 	if (vstr)
 		free(vstr);
@@ -239,8 +237,6 @@ static void _fini(struct appdata *ad)
 int main(int argc, char *argv[])
 {
 	struct appdata ad;
-
-	set_window_scale();
 
 	elm_init(argc, argv);
 

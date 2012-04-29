@@ -85,30 +85,3 @@ void prop_int_set(const char *name, unsigned int val)
 	XCloseDisplay(d);
 }
 
-void set_window_scale(void)
-{
-	double root_width = 0.0, root_height = 0.0;
-	char buf[128] = { 0, };
-	Display *disp;
-	int screen_num;
-
-	disp = XOpenDisplay(NULL);
-	if (disp == NULL)
-		return;
-
-	screen_num = DefaultScreen(disp);
-
-	root_width = DisplayWidth(disp, screen_num);
-	root_height = DisplayHeight(disp, screen_num);
-
-	XCloseDisplay(disp);
-
-	snprintf(buf, sizeof(buf), "%lf", root_height / DEFAULT_WINDOW_H);
-
-	if (root_width == 800 && root_height == 1280) {
-		snprintf(buf, sizeof(buf), "0.71");
-	}
-
-	setenv("ELM_SCALE", buf, 1);
-	setenv("SCALE_FACTOR", buf, 1);
-}

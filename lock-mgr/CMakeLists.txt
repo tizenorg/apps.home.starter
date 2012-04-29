@@ -24,7 +24,6 @@ pkg_check_modules(pkgs_lock_daemon REQUIRED
 	utilX
 	ecore-input
 	glib-2.0
-	ui-gadget
 	bundle
 )
 FOREACH (flag ${pkgs_lock_daemon_CFLAGS})
@@ -36,6 +35,7 @@ ADD_LIBRARY(${PROJECT_NAME} SHARED
 	src/lock-daemon.c
 	src/lockd-debug.c
 	src/lockd-process-mgr.c
+	src/lockd-window-mgr.c
 )
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/include)
 

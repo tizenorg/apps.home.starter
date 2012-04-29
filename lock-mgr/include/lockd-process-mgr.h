@@ -25,9 +25,12 @@
 int lockd_process_mgr_start_lock(void *data, int (*dead_cb) (int, void *),
 				 int phone_lock_state);
 
-void lockd_process_mgr_restart_lock(int phone_lock_state);
+int lockd_process_mgr_restart_lock(int phone_lock_state);
 
 int lockd_process_mgr_start_phone_lock(void);
+
+void lockd_process_mgr_terminate_lock_app(int lock_app_pid,
+					  int state);
 
 void lockd_process_mgr_terminate_phone_lock(int phone_lock_pid);
 

@@ -1,3 +1,11 @@
+starter (0.4.0-1) unstable; urgency=low
+
+  * apply lock screen
+  * Git: pkgs/s/starter
+  * Tag: starter_0.4.0-1
+
+ -- Seungtaek Chung <seungtaek.chung@samsung.com>  Tue, 20 Mar 2012 19:44:21 +0900
+
 starter (0.3.44) unstable; urgency=low
 
   * rollback the boilerplate

@@ -40,12 +40,15 @@
 #include "lockd-debug.h"
 #include "lock-daemon.h"
 #include "lockd-process-mgr.h"
+#include "lockd-window-mgr.h"
 
 static int phone_lock_pid;
 
 struct lockd_data {
+	int lock_app_pid;
 	int phone_lock_app_pid;
 	int phone_lock_state;
+	lockw_data *lockw;
 };
 
 struct ucred {
@@ -58,8 +61,10 @@ struct ucred {
 #define PHLOCK_SOCK_PREFIX "/tmp/phlock"
 #define PHLOCK_SOCK_MAXBUFF 65535
 #define PHLOCK_APP_CMDLINE "/opt/apps/org.tizen.phone-lock/bin/phone-lock"
+#define LAUNCH_INTERVAL 100*1000
 
 static void lockd_launch_app_lockscreen(struct lockd_data *lockd);
+static void lockd_unlock_lockscreen(struct lockd_data *lockd);
 
 static void _lockd_notify_pm_state_cb(keynode_t * node, void *data)
 {
@@ -103,6 +108,10 @@ _lockd_notify_lock_state_cb(keynode_t * node, void *data)
 
 	if (val == VCONFKEY_IDLE_UNLOCK) {
 		LOCKD_DBG("unlocked..!!");
+		if (lockd->lock_app_pid != 0) {
+			LOCKD_DBG("terminate lock app..!!");
+			lockd_process_mgr_terminate_lock_app(lockd->lock_app_pid, 1);
+		}
 	}
 }
 
@@ -125,8 +134,51 @@ _lockd_notify_phone_lock_verification_cb(keynode_t * node, void *data)
 	}
 
 	if (val == TRUE) {
+		lockd_window_mgr_finish_lock(lockd->lockw);
 		vconf_set_int(VCONFKEY_IDLE_LOCK_STATE, VCONFKEY_IDLE_UNLOCK);
 	}
+}
+
+static int lockd_app_dead_cb(int pid, void *data)
+{
+	LOCKD_DBG("app dead cb call! (pid : %d)", pid);
+
+	struct lockd_data *lockd = (struct lockd_data *)data;
+
+	if (pid == lockd->lock_app_pid && lockd->phone_lock_state == 0) {
+		LOCKD_DBG("lock app(pid:%d) is destroyed.", pid);
+		lockd_unlock_lockscreen(lockd);
+	}
+	return 0;
+}
+
+static Eina_Bool lockd_app_create_cb(void *data, int type, void *event)
+{
+	struct lockd_data *lockd = (struct lockd_data *)data;
+
+	if (lockd == NULL) {
+		return EINA_TRUE;
+	}
+	LOCKD_DBG("%s, %d", __func__, __LINE__);
+	lockd_window_set_window_effect(lockd->lockw, lockd->lock_app_pid,
+				       event);
+	lockd_window_set_window_property(lockd->lockw, lockd->lock_app_pid,
+					 event);
+	return EINA_FALSE;
+}
+
+static Eina_Bool lockd_app_show_cb(void *data, int type, void *event)
+{
+	struct lockd_data *lockd = (struct lockd_data *)data;
+
+	if (lockd == NULL) {
+		return EINA_TRUE;
+	}
+	LOCKD_DBG("%s, %d", __func__, __LINE__);
+	lockd_window_set_window_property(lockd->lockw, lockd->lock_app_pid,
+					 event);
+
+	return EINA_FALSE;
 }
 
 static void lockd_launch_app_lockscreen(struct lockd_data *lockd)
@@ -134,6 +186,7 @@ static void lockd_launch_app_lockscreen(struct lockd_data *lockd)
 	LOCKD_DBG("launch app lock screen");
 
 	int call_state = -1, bootlock_state = -1;
+	int r = 0;
 
 	vconf_get_bool(VCONFKEY_SETAPPL_STATE_POWER_ON_LOCK_BOOL,
 		       &bootlock_state);
@@ -142,6 +195,18 @@ static void lockd_launch_app_lockscreen(struct lockd_data *lockd)
 		lockd->phone_lock_state = 1;
 	} else {
 		lockd->phone_lock_state = 0;
+	}
+
+	if (lockd_process_mgr_check_lock(lockd->lock_app_pid) == TRUE) {
+		LOCKD_DBG("Lock Screen App is already running.");
+		r = lockd_process_mgr_restart_lock(lockd->phone_lock_state);
+		if (r < 0) {
+			LOCKD_DBG("Restarting Lock Screen App is fail [%d].", r);
+			usleep(LAUNCH_INTERVAL);
+		} else {
+			LOCKD_DBG("Restarting Lock Screen App, pid[%d].", r);
+			return;
+		}
 	}
 
 	vconf_get_int(VCONFKEY_CALL_STATE, &call_state);
@@ -154,7 +219,6 @@ static void lockd_launch_app_lockscreen(struct lockd_data *lockd)
 
 	if (lockd->phone_lock_state == 1) {
 		vconf_set_bool(VCONFKEY_PHONE_LOCK_VERIFICATION, FALSE);
-		/* Check phone lock application is already exit */
 		if (lockd_process_mgr_check_lock(lockd->phone_lock_app_pid) == TRUE) {
 			LOCKD_DBG("phone lock App is already running.");
 			return;
@@ -165,7 +229,27 @@ static void lockd_launch_app_lockscreen(struct lockd_data *lockd)
 		phone_lock_pid = lockd->phone_lock_app_pid;
 		LOCKD_DBG("%s, %d, phone_lock_pid = %d", __func__, __LINE__,
 			  phone_lock_pid);
+		lockd_window_set_phonelock_pid(lockd->lockw, phone_lock_pid);
+	} else {
+		lockd->lock_app_pid =
+		    lockd_process_mgr_start_lock(lockd, lockd_app_dead_cb,
+						 lockd->phone_lock_state);
+		if (lockd->lock_app_pid < 0)
+			return;
+		vconf_set_int(VCONFKEY_IDLE_LOCK_STATE, VCONFKEY_IDLE_LOCK);
+		lockd_window_mgr_ready_lock(lockd, lockd->lockw, lockd_app_create_cb,
+					    lockd_app_show_cb);
 	}
+}
+
+static void lockd_unlock_lockscreen(struct lockd_data *lockd)
+{
+	LOCKD_DBG("unlock lock screen");
+	lockd->lock_app_pid = 0;
+
+	lockd_window_mgr_finish_lock(lockd->lockw);
+
+	vconf_set_int(VCONFKEY_IDLE_LOCK_STATE, VCONFKEY_IDLE_UNLOCK);
 }
 
 inline static void lockd_set_sock_option(int fd, int cli)
@@ -460,7 +544,6 @@ static void lockd_init_vconf(struct lockd_data *lockd)
 		LOCKD_ERR
 		    ("[Error] vconf notify : lock state");
 	}
-	
 }
 
 static void lockd_start_lock_daemon(void *data)
@@ -482,6 +565,7 @@ static void lockd_start_lock_daemon(void *data)
 	if (r < 0) {
 		LOCKD_DBG("lockd init socket failed: %d", r);
 	}
+	lockd->lockw = lockd_window_init();
 
 	LOCKD_DBG("%s, %d", __func__, __LINE__);
 }
