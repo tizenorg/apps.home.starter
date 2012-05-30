@@ -5,6 +5,7 @@ Release:    1
 Group:      Apache
 License:    TO_BE/FILLED_IN
 Source0:    starter-%{version}.tar.gz
+Source1001: packaging/starter.manifest 
 Requires(post): /usr/bin/vconftool
 BuildRequires:  cmake
 BuildRequires:  pkgconfig(glib-2.0)
@@ -29,6 +30,7 @@ Description: Starter
 cmake . -DCMAKE_INSTALL_PREFIX=%{_prefix}
 
 %build
+cp %{SOURCE1001} .
 
 make -j1 
 %install
@@ -47,6 +49,7 @@ ln -sf /etc/init.d/rd3starter /etc/rc.d/rc3.d/S43starter
 sync
 
 %files
+%manifest starter.manifest
 %defattr(-,root,root,-)
 %{_sysconfdir}/init.d/rd4starter
 %{_sysconfdir}/init.d/rd3starter
