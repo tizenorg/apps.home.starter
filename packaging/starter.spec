@@ -6,6 +6,7 @@ Group:      Apache
 License:    TO_BE/FILLED_IN
 Source0:    starter-%{version}.tar.gz
 Source1001: packaging/starter.manifest 
+Source1:    starter.service
 Requires(post): /usr/bin/vconftool
 BuildRequires:  cmake
 BuildRequires:  pkgconfig(glib-2.0)
@@ -37,6 +38,9 @@ make -j1
 rm -rf %{buildroot}
 %make_install
 
+mkdir -p %{buildroot}%{_libdir}/systemd/user/core-efl.target.wants
+install -m 0644 %SOURCE1 %{buildroot}%{_libdir}/systemd/user/
+ln -s ../starter.service %{buildroot}%{_libdir}/systemd/user/core-efl.target.wants/starter.service
 
 %post
 vconftool set -t int "memory/startapps/sequence" 0 -i -u 5000 -g 5000
@@ -55,4 +59,6 @@ sync
 %{_sysconfdir}/init.d/rd3starter
 %{_bindir}/starter
 %{_libdir}/liblock-daemon.so
+%{_libdir}/systemd/user/starter.service
+%{_libdir}/systemd/user/core-efl.target.wants/starter.service
 
