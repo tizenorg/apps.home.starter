@@ -1,0 +1,14 @@
+
+[Unit]
+Description=Start the "starter" program
+Before=core-efl.target
+After=xorg.target
+After=menu-daemon.service
+Requires=menu-daemon.service
+
+[Service]
+ExecStart=/usr/bin/starter
+
+[Install]
+WantedBy=core-efl.target
+
