@@ -25,11 +25,13 @@ pkg_check_modules(pkgs_lock_daemon REQUIRED
 	ecore-input
 	glib-2.0
 	bundle
+	capi-appfw-application
 )
 FOREACH (flag ${pkgs_lock_daemon_CFLAGS})
 	SET(EXTRA_CFLAGS "${EXTRA_CFLAGS} ${flag}")
 ENDFOREACH(flag)
 
+ADD_DEFINITIONS("-D_GNU_SOURCE")
 ADD_DEFINITIONS(${EXTRA_CFLAGS})
 ADD_LIBRARY(${PROJECT_NAME} SHARED
 	src/lock-daemon.c
@@ -38,6 +40,7 @@ ADD_LIBRARY(${PROJECT_NAME} SHARED
 	src/lockd-window-mgr.c
 )
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/include)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include)
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${pkgs_lock_daemon_LDFLAGS})
 INSTALL(TARGETS ${PROJECT_NAME} DESTINATION lib)

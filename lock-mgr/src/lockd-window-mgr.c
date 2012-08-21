@@ -1,22 +1,17 @@
 /*
- *  starter
+ * Copyright 2012  Samsung Electronics Co., Ltd
  *
- * Copyright (c) 2000 - 2011 Samsung Electronics Co., Ltd. All rights reserved.
- *
- * Contact: Seungtaek Chung <seungtaek.chung@samsung.com>, Mi-Ju Lee <miju52.lee@samsung.com>, Xi Zhichan <zhichan.xi@samsung.com>
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Flora License, Version 1.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *  http://www.tizenopensource.org/license
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
 #include <Elementary.h>
@@ -25,12 +20,12 @@
 #include <vconf.h>
 #include <bundle.h>
 #include <appcore-efl.h>
+#include <app.h>
 
 #include "lockd-debug.h"
 #include "lockd-window-mgr.h"
 
 #define PACKAGE 		"starter"
-#define VCONFKEY_PHONE_LOCK_VERIFICATION "memory/lockscreen/phone_lock_verification"
 
 struct _lockw_data {
 	Ecore_X_Window input_x_window;
@@ -44,13 +39,12 @@ struct _lockw_data {
 	Ecore_Event_Handler *h_wincreate;
 	Ecore_Event_Handler *h_winshow;
 
-	int phone_lock_state;
-	int phone_lock_app_pid;
 };
 
 static Eina_Bool _lockd_window_key_down_cb(void *data, int type, void *event)
 {
 	LOCKD_DBG("Key Down CB.");
+
 	return ECORE_CALLBACK_PASS_ON;
 }
 
@@ -87,6 +81,7 @@ _lockd_window_check_validate_rect(Ecore_X_Display * dpy, Ecore_X_Window window)
 			}
 		}
 	}
+
 	return ret;
 }
 
@@ -120,6 +115,7 @@ static Window get_user_created_window(Window win)
 	XFree((void *)prop_ret);
 
 	return xid;
+
 }
 
 void
@@ -196,19 +192,6 @@ lockd_window_set_window_effect(lockw_data * data, int lock_app_pid, void *event)
 	}
 }
 
-void lockd_window_set_phonelock_pid(lockw_data * data, int phone_lock_pid)
-{
-	lockw_data *lockw = (lockw_data *) data;
-
-	if (!lockw) {
-		return;
-	}
-	LOCKD_DBG("%s, %d", __func__, __LINE__);
-	lockw->phone_lock_app_pid = phone_lock_pid;
-	LOCKD_DBG("%s, %d, lockw->phone_lock_app_pid = %d", __func__, __LINE__,
-		  lockw->phone_lock_app_pid);
-}
-
 void
 lockd_window_mgr_ready_lock(void *data, lockw_data * lockw,
 			    Eina_Bool(*create_cb) (void *, int, void *),
@@ -272,6 +255,7 @@ lockw_data *lockd_window_init(void)
 	memset(lockw, 0x0, sizeof(lockw_data));
 
 	pid = getpid();
+
 	input_x_window = ecore_x_window_input_new(0, 0, 0, 1, 1);
 	ecore_x_icccm_title_set(input_x_window, "lock-daemon-input-window");
 	ecore_x_netwm_name_set(input_x_window, "lock-daemon-input-window");
@@ -284,4 +268,3 @@ lockw_data *lockd_window_init(void)
 
 	return lockw;
 }
-

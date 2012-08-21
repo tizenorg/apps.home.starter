@@ -1,8 +1,8 @@
 #!/bin/sh
 
-vconftool set -t int "memory/startapps/sequence" 0 -i -u 5000 -g 5000
+vconftool set -t int "memory/starter/sequence" 0 -i -u 5000 -g 5000
 
-vconftool set -t string db/lockscreen/pkgname "org.tizen.draglock" -u 5000 -g 5000
+vconftool set -t string file/private/lockscreen/pkgname "org.tizen.draglock" -u 5000 -g 5000
 
 vconftool -i set -t int memory/idle_lock/state "0" -u 5000 -g 5000
 
