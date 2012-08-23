@@ -75,6 +75,34 @@ static void _set_elm_theme(void)
 	if (vstr)
 		free(vstr);
 }
+static int _launch_pwlock(void)
+{
+	int r;
+
+	_DBG("%s", __func__);
+
+	r = aul_launch_app("org.tizen.pwlock", NULL);
+	if (r < 0) {
+		_ERR("PWLock launch error: error(%d)", r);
+		if (r == AUL_R_ETIMEOUT) {
+			_DBG("Launch pwlock is failed for AUL_R_ETIMEOUT, again launch pwlock");
+			r = aul_launch_app("org.tizen.pwlock", NULL);
+			if (r < 0) {
+				_ERR("2'nd PWLock launch error: error(%d)", r);
+				return -1;
+			} else {
+				_DBG("Launch pwlock");
+				return 0;
+			}
+		} else {
+			return -1;
+		}
+	} else {
+		_DBG("Launch pwlock");
+		return 0;
+	}
+
+}
 
 static void hib_leave(void *data)
 {
@@ -87,6 +115,9 @@ static void hib_leave(void *data)
 	_DBG("%s", __func__);
 	_set_elm_theme();
 	start_lock_daemon();
+	if (_launch_pwlock() < 0) {
+		_ERR("launch pwlock error");
+	}
 }
 
 static int add_noti(struct appdata *ad)
@@ -174,7 +205,10 @@ static int _init(struct appdata *ad)
 	if (fd == -1) {
 		_DBG("fd = %d\n", fd);
 		start_lock_daemon();
- 		r = 0;
+		if (_launch_pwlock() < 0) {
+			_ERR("launch pwlock error");
+		}
+		r = 0;
 	} else {
 		close(fd);
 		r = add_noti(ad);
