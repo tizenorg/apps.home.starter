@@ -59,6 +59,7 @@ change_file_executable /etc/opt/init/starter.init.sh
 sync
 
 %files
+%manifest starter.manifest
 %defattr(-,root,root,-)
 /etc/opt/init/starter.init.sh
 %{_sysconfdir}/init.d/rd4starter
