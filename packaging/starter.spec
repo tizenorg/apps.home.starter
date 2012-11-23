@@ -5,6 +5,7 @@ Release:    1
 Group:      TO_BE/FILLED_IN
 License:    Flora Software License
 Source0:    starter-%{version}.tar.gz
+Source1:    starter.service
 Requires(post): /usr/bin/vconftool
 BuildRequires:  cmake
 BuildRequires:  pkgconfig(glib-2.0)
@@ -36,6 +37,9 @@ make -j1
 rm -rf %{buildroot}
 %make_install
 
+mkdir -p %{buildroot}%{_libdir}/systemd/user/core-efl.target.wants
+install -m 0644 %SOURCE1 %{buildroot}%{_libdir}/systemd/user/
+ln -s ../starter.service %{buildroot}%{_libdir}/systemd/user/core-efl.target.wants/starter.service
 
 %post
 change_file_executable()
@@ -66,3 +70,5 @@ sync
 %{_sysconfdir}/init.d/rd3starter
 %{_bindir}/starter
 %{_libdir}/liblock-daemon.so
+%{_libdir}/systemd/user/starter.service
+%{_libdir}/systemd/user/core-efl.target.wants/starter.service
