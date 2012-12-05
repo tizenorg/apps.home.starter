@@ -1,7 +1,7 @@
 Name:       starter
 Summary:    starter
 Version: 0.4.11
-Release:    1
+Release:    2
 Group:      TO_BE/FILLED_IN
 License:    Flora Software License
 Source0:    starter-%{version}.tar.gz
