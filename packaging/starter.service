@@ -1,13 +1,11 @@
-
 [Unit]
 Description=Start the "starter" program
 Before=core-efl.target
-After=xorg.target e17.service
-Before=menu-daemon.service
+After=xorg.target
 
 [Service]
 ExecStart=/usr/bin/starter
 
 [Install]
 WantedBy=core-efl.target
-
+WantedBy=tizen-mobile-session.target
