@@ -53,19 +53,9 @@ struct lockd_data {
 	GPollFD *gpollfd;
 };
 
-/* define it temp */
-#if 0
-struct ucred {
-	pid_t pid;		/* PID of sending process.  */
-	uid_t uid;		/* UID of sending process.  */
-	gid_t gid;		/* GID of sending process.  */
-};
-#endif
-
 #define PHLOCK_SOCK_PREFIX "/tmp/phlock"
 #define PHLOCK_SOCK_MAXBUFF 65535
-#define PHLOCK_APP_CMDLINE "/usr/apps/org.tizen.phone-lock/bin/phone-lock"
-#define MDM_APP_CMDLINE "/usr/bin/mdm-server"
+#define PHLOCK_APP_CMDLINE "/usr/apps/org.tizen.lockscreen/bin/lockscreen"
 #define PHLOCK_UNLOCK_CMD "unlock"
 #define PHLOCK_LAUNCH_CMD "launch_phone_lock"
 #define LAUNCH_INTERVAL 100*1000
@@ -82,8 +72,7 @@ static int _lockd_get_lock_type(void)
 	vconf_get_int(VCONFKEY_SETAPPL_SCREEN_LOCK_TYPE_INT, &lock_type);
 
 	if (lock_type == SETTING_SCREEN_LOCK_TYPE_PASSWORD ||
-		lock_type == SETTING_SCREEN_LOCK_TYPE_SIMPLE_PASSWORD ||
-		lock_type == SETTING_SCREEN_LOCK_TYPE_FACE_AND_VOICE) {
+		lock_type == SETTING_SCREEN_LOCK_TYPE_SIMPLE_PASSWORD) {
 		ret = 1;
 	} else if (lock_type == SETTING_SCREEN_LOCK_TYPE_SWIPE ||
 		lock_type == SETTING_SCREEN_LOCK_TYPE_MOTION) {
@@ -166,8 +155,6 @@ _lockd_notify_phone_lock_verification_cb(keynode_t * node, void *data)
 	}
 
 	if (val == TRUE) {
-		/* password verified */
-		/* lockd_unlock_lockscreen(lockd); */
 		lockd_window_mgr_finish_lock(lockd->lockw);
 		vconf_set_int(VCONFKEY_IDLE_LOCK_STATE, VCONFKEY_IDLE_UNLOCK);
 	}
@@ -207,7 +194,6 @@ static Eina_Bool lockd_app_create_cb(void *data, int type, void *event)
 	LOCKD_DBG("%s, %d", __func__, __LINE__);
 	lockd_window_set_window_effect(lockd->lockw, lockd->lock_app_pid,
 				       event);
-	//FIXME sometimes show cb is not called.
 	lockd_window_set_window_property(lockd->lockw, lockd->lock_app_pid,
 					 event);
 
@@ -238,18 +224,7 @@ static int lockd_launch_app_lockscreen(struct lockd_data *lockd)
 	int r = 0;
 
 	WRITE_FILE_LOG("%s", "Launch lockscreen in starter");
-	vconf_get_int(VCONFKEY_TELEPHONY_SIM_FACTORY_MODE, &factory_mode);
-	if (factory_mode == VCONFKEY_TELEPHONY_SIM_FACTORYMODE_ON) {
-		LOCKD_DBG("Factory mode ON, lock screen can't be launched..!!");
-		return 0;
-	}
-	vconf_get_int(VCONFKEY_TESTMODE_SCREEN_LOCK, &test_mode);
-	if (test_mode == VCONFKEY_TESTMODE_SCREEN_LOCK_DISABLE) {
-		LOCKD_DBG("Test mode ON, lock screen can't be launched..!!");
-		return 0;
-	}
 
-	/* Check lock screen application is already exit, no checking phone-lock */
 	if (lockd_process_mgr_check_lock(lockd->lock_app_pid) == TRUE) {
 		LOCKD_DBG("Lock Screen App is already running.");
 		r = lockd_process_mgr_restart_lock(lockd->lock_type);
@@ -262,7 +237,6 @@ static int lockd_launch_app_lockscreen(struct lockd_data *lockd)
 		}
 	}
 
-	/* Get Call state */
 	vconf_get_int(VCONFKEY_CALL_STATE, &call_state);
 	if (call_state != VCONFKEY_CALL_OFF) {
 		LOCKD_DBG
@@ -276,43 +250,28 @@ static int lockd_launch_app_lockscreen(struct lockd_data *lockd)
 		    lockd_process_mgr_start_normal_lock(lockd, lockd_app_dead_cb);
 		if (lockd->lock_app_pid < 0)
 			return 0;
-		/* reset window mgr before start win mgr  */
 		lockd_window_mgr_finish_lock(lockd->lockw);
 		lockd_window_mgr_ready_lock(lockd, lockd->lockw, lockd_app_create_cb,
 					    lockd_app_show_cb);
 	} else if (lockd->lock_type == 1) {
 		vconf_set_bool(VCONFKEY_LOCKSCREEN_PHONE_LOCK_VERIFICATION, FALSE);
-		/* Check phone lock application is already exit */
 		if (lockd_process_mgr_check_lock(lockd->phone_lock_app_pid) == TRUE) {
 			LOCKD_DBG("phone lock App is already running.");
 			if (lockd->request_recovery == FALSE)
 				return 1;
 		}
+		lockd->phone_lock_app_pid = lockd_process_mgr_start_phone_lock();
 
-		/* TO DO : Recovery should be checked by EAS interface later */
-		/* After getting EAS interface, we should remove lockd->request_recovery */
-		if (lockd->request_recovery == TRUE) {
-			lockd->phone_lock_app_pid =
-			    lockd_process_mgr_start_recovery_lock();
-			lockd->request_recovery = FALSE;
-		} else {
-			lockd->phone_lock_app_pid =
-			    lockd_process_mgr_start_phone_lock();
-		}
 		phone_lock_pid = lockd->phone_lock_app_pid;
 		LOCKD_DBG("%s, %d, phone_lock_pid = %d", __func__, __LINE__,
 			  phone_lock_pid);
 		lockd_window_set_phonelock_pid(lockd->lockw, phone_lock_pid);
-
-		/* Set lock state */ 
-		//ecore_idler_add(lockd_set_lock_state_cb, NULL); //don't set lock state for lcd on.
 	} else {
 		lockd->lock_app_pid =
 		    lockd_process_mgr_start_lock(lockd, lockd_app_dead_cb,
 						 lockd->lock_type);
 		if (lockd->lock_app_pid < 0)
 			return 0;
-		/* reset window mgr before start win mgr  */
 		lockd_window_mgr_finish_lock(lockd->lockw);
 		lockd_window_mgr_ready_lock(lockd, lockd->lockw, lockd_app_create_cb,
 					    lockd_app_show_cb);
@@ -544,20 +503,6 @@ static int lockd_sock_handler(void *data)
 		}
 	} else if (!strncmp(cmd, PHLOCK_LAUNCH_CMD, strlen(cmd))) {
 		LOCKD_DBG("cmd is %s\n", PHLOCK_LAUNCH_CMD);
-
-		if (!strncmp(cmdline, MDM_APP_CMDLINE, strlen(cmdline))) {
-			LOCKD_DBG("cmdline is %s \n", MDM_APP_CMDLINE);
-			if (vconf_get_int(VCONFKEY_EAS_RECOVERY_MODE, &recovery_state) < 0) {
-				LOCKD_ERR("Cannot get %s vconfkey", VCONFKEY_EAS_RECOVERY_MODE);
-				lockd->request_recovery = FALSE;
-			} else if (recovery_state == 1) {
-				LOCKD_DBG("recovery mode : %d \n", recovery_state);
-				lockd->request_recovery = TRUE;
-			} else {
-				lockd->request_recovery = FALSE;
-			}
-		}
-
 		if (_lockd_get_lock_type() == 1) {
 			lockd->lock_type = 1;
 			lockd_launch_app_lockscreen(lockd);
@@ -680,15 +625,13 @@ static void lockd_start_lock_daemon(void *data)
 
 	LOCKD_DBG("%s, %d", __func__, __LINE__);
 
-	/* register vconf notification */
 	lockd_init_vconf(lockd);
 
-	/* Initialize socket */
 	r = lockd_init_sock(lockd);
 	if (r < 0) {
 		LOCKD_DBG("lockd init socket failed: %d", r);
 	}
-	/* Create internal 1x1 window */
+
 	lockd->lockw = lockd_window_init();
 
 	aul_listen_app_dead_signal(lockd_app_dead_cb, data);
@@ -725,15 +668,7 @@ int start_lock_daemon(int launch_lock)
 
 	lock_type = _lockd_get_lock_type();
 	if (lock_type == 1) {
-		if (vconf_get_int(VCONFKEY_EAS_RECOVERY_MODE, &recovery_state) < 0) {
-			LOCKD_ERR("Cannot get %s vconfkey", VCONFKEY_EAS_RECOVERY_MODE);
-			lockd->request_recovery = FALSE;
-		} else if (recovery_state == 1) {
-			LOCKD_DBG("recovery mode : %d \n", recovery_state);
-			lockd->request_recovery = TRUE;
-		} else {
-			lockd->request_recovery = FALSE;
-		}
+		lockd->request_recovery = FALSE;
 	} else if (lock_type == 2) {
 		lock_type = 0;
 	}

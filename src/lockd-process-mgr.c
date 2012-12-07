@@ -25,9 +25,9 @@
 #include "lockd-process-mgr.h"
 #include "starter-vconf.h"
 
-#define LOCKD_DEFAULT_PKG_NAME "org.tizen.livebox-lock"
-#define LOCKD_DEFAULT_LOCKSCREEN "org.tizen.draglock"
-#define LOCKD_PHONE_LOCK_PKG_NAME "org.tizen.phone-lock"
+#define LOCKD_DEFAULT_PKG_NAME "org.tizen.lockscreen"
+#define LOCKD_DEFAULT_LOCKSCREEN "org.tizen.lockscreen"
+#define LOCKD_PHONE_LOCK_PKG_NAME "org.tizen.lockscreen"
 #define RETRY_MAXCOUNT 30
 #define RELAUNCH_INTERVAL 100*1000
 
@@ -50,49 +50,28 @@ int lockd_process_mgr_restart_lock(int phone_lock_state)
 {
 	char *lock_app_path = NULL;
 	int pid;
-	bundle *b = NULL;
 
 	lock_app_path = _lockd_process_mgr_get_pkgname();
-
-	b = bundle_create();
-
-	if (phone_lock_state == 1)
-		bundle_add(b, "mode", "lock");
-	else
-		bundle_add(b, "mode", "normal");
-
-	pid = aul_launch_app(lock_app_path, b);
+	pid = aul_launch_app(lock_app_path, NULL);
 
 	LOCKD_DBG("Reset : aul_launch_app(%s, NULL), pid = %d", lock_app_path,
 		  pid);
 
-	if (b)
-		bundle_free(b);
-
 	return pid;
 }
 
-int
-lockd_process_mgr_start_lock(void *data, int (*dead_cb) (int, void *),
+int lockd_process_mgr_start_lock(void *data, int (*dead_cb) (int, void *),
 			     int phone_lock_state)
 {
 	char *lock_app_path = NULL;
 	int pid;
-	bundle *b = NULL;
 
 	lock_app_path = _lockd_process_mgr_get_pkgname();
-
-	b = bundle_create();
-
-	if (phone_lock_state == 1)
-		bundle_add(b, "mode", "lock");
-	else
-		bundle_add(b, "mode", "normal");
 
 	int i;
 	for (i=0; i<RETRY_MAXCOUNT; i++)
 	{
-		pid = aul_launch_app(lock_app_path, b);
+		pid = aul_launch_app(lock_app_path, NULL);
 
 		LOCKD_DBG("aul_launch_app(%s), pid = %d", lock_app_path, pid);
 
@@ -101,15 +80,11 @@ lockd_process_mgr_start_lock(void *data, int (*dead_cb) (int, void *),
 			usleep(RELAUNCH_INTERVAL);
 		} else if (pid == AUL_R_ERROR) {
 			LOCKD_DBG("launch[%s] is failed, launch default lock screen", lock_app_path);
-			pid = aul_launch_app(LOCKD_DEFAULT_LOCKSCREEN, b);
+			pid = aul_launch_app(LOCKD_DEFAULT_LOCKSCREEN, NULL);
 			if (pid >0) {
-				if (b)
-					bundle_free(b);
 				return pid;
 			}
 		} else {
-			if (b)
-				bundle_free(b);
 			return pid;
 		}
 	}
@@ -148,52 +123,14 @@ int lockd_process_mgr_start_normal_lock(void *data, int (*dead_cb) (int, void *)
 int lockd_process_mgr_start_phone_lock(void)
 {
 	int pid = 0;
-	bundle *b = NULL;
 
-	b = bundle_create();
-
-#if 1
-	bundle_add(b, "pwlock_type", "running_lock");
-	bundle_add(b, "window_type", "alpha");
-
-	pid = aul_launch_app(LOCKD_PHONE_LOCK_PKG_NAME, b);
+	pid = aul_launch_app(LOCKD_PHONE_LOCK_PKG_NAME, NULL);
 	LOCKD_DBG("aul_launch_app(%s, b), pid = %d", LOCKD_PHONE_LOCK_PKG_NAME,
 		  pid);
-#else
-	bundle_add(b, "mode", "lock");
-
-	pid = aul_launch_app(LOCKD_DEFAULT_PKG_NAME, b);
-
-	LOCKD_DBG("aul_launch_app(%s, NULL), pid = %d", LOCKD_DEFAULT_PKG_NAME,
-		  pid);
-#endif
-	if (b)
-		bundle_free(b);
-
 	return pid;
 }
 
-int lockd_process_mgr_start_recovery_lock(void)
-{
-	int pid = 0;
-	bundle *b = NULL;
-
-	b = bundle_create();
-
-	bundle_add(b, "pwlock_type", "recovery_lock");
-	bundle_add(b, "window_type", "alpha");
-
-	pid = aul_launch_app(LOCKD_PHONE_LOCK_PKG_NAME, b);
-	LOCKD_DBG("aul_launch_app(%s, b), pid = %d", LOCKD_PHONE_LOCK_PKG_NAME,
-		  pid);
-	if (b)
-		bundle_free(b);
-
-	return pid;
-}
-
-void
-lockd_process_mgr_terminate_lock_app(int lock_app_pid, int state)
+void lockd_process_mgr_terminate_lock_app(int lock_app_pid, int state)
 {
 	LOCKD_DBG
 	    ("lockd_process_mgr_terminate_lock_app,  state:%d\n",
@@ -217,7 +154,7 @@ int lockd_process_mgr_check_lock(int pid)
 {
 	char buf[128];
 	LOCKD_DBG("%s, %d", __func__, __LINE__);
-	/* Check pid is invalid. */
+
 	if (aul_app_get_pkgname_bypid(pid, buf, sizeof(buf)) < 0) {
 		LOCKD_DBG("no such pkg by pid %d\n", pid);
 	} else {

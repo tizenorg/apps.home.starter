@@ -31,7 +31,6 @@
 #include <heynoti.h>
 #include <signal.h>
 
-
 #include "starter.h"
 #include "starter-util.h"
 #include "x11.h"
@@ -45,9 +44,7 @@
 
 #define DEFAULT_THEME "tizen"
 #define PWLOCK_PATH "/usr/apps/org.tizen.pwlock/bin/pwlock"
-
-#define DATA_ENCRYPTED "encrypted"
-#define DATA_MOUNTED "mounted"
+#define PWLOCK_PKG_NAME "org.tizen.pwlock"
 
 static void lock_menu_screen(void)
 {
@@ -85,40 +82,18 @@ static void _set_elm_theme(void)
 		free(vstr);
 }
 
-#if 0
-static void _set_elm_entry(void)
-{
-	int v;
-	int r;
-
-	r = vconf_get_bool(VCONFKEY_SETAPPL_AUTOCAPITAL_ALLOW_BOOL, &v);
-	if (!r) {
-		prop_int_set("ENLIGHTENMENT_AUTOCAPITAL_ALLOW", v);
-		_DBG("vconf autocatipal[%d]", v);
-	}
-
-	r = vconf_get_bool(VCONFKEY_SETAPPL_AUTOPERIOD_ALLOW_BOOL, &v);
-	if (!r) {
-		prop_int_set("ENLIGHTENMENT_AUTOPERIOD_ALLOW", v);
-		_DBG("vconf autoperiod[%d]", v);
-	}
-}
-#endif
-
 static int _launch_pwlock(void)
 {
 	int r;
-	//int i = 0;
 
 	_DBG("%s", __func__);
 
-#if 1
-	r = aul_launch_app("org.tizen.pwlock", NULL);
+	r = aul_launch_app(PWLOCK_PKG_NAME, NULL);
 	if (r < 0) {
 		_ERR("PWLock launch error: error(%d)", r);
 		if (r == AUL_R_ETIMEOUT) {
 			_DBG("Launch pwlock is failed for AUL_R_ETIMEOUT, again launch pwlock");
-			r = aul_launch_app("org.tizen.pwlock", NULL);
+			r = aul_launch_app(PWLOCK_PKG_NAME, NULL);
 			if (r < 0) {
 				_ERR("2'nd PWLock launch error: error(%d)", r);
 				return -1;
@@ -133,23 +108,6 @@ static int _launch_pwlock(void)
 		_DBG("Launch pwlock");
 		return 0;
 	}
-#else
- retry_con:
-	r = aul_launch_app("org.tizen.pwlock", NULL);
-	if (r < 0) {
-		_ERR("PWLock launch error: error(%d)", r);
-		if (r == AUL_R_ETIMEOUT) {
-			i++;
-			_DBG("Launching pwlock is failed [%d]times for AUL_R_ETIMEOUT ", i);
-			goto retry_con;
-		} else {
-			return -1;
-		}
-	} else {
-		_DBG("Launch pwlock");
-		return 0;
-	}
-#endif
 }
 
 static void _signal_handler(int signum, siginfo_t *info, void *unused)
@@ -190,24 +148,6 @@ static void _lock_state_cb(keynode_t * node, void *data)
 	}
 }
 
-static void _data_encryption_cb(keynode_t * node, void *data)
-{
-	int r;
-	char *file = NULL;
-
-	_DBG("%s %d\n", __func__, __LINE__);
-
-	file = vconf_get_str(VCONFKEY_ODE_CRYPTO_STATE);
-	if (file != NULL) {
-		_DBG("get %s : %s\n", VCONFKEY_ODE_CRYPTO_STATE, file);
-		if (!strcmp(file, DATA_MOUNTED)) {
-			start_lock_daemon(FALSE);
-			menu_daemon_init(NULL);
-		}
-		free(file);
-	}
-}
-
 static void _init(struct appdata *ad)
 {
 	int r;
@@ -240,29 +180,6 @@ static void _init(struct appdata *ad)
 
 	_DBG("%s %d\n", __func__, __LINE__);
 
-	/* Check data encrption */
-	file = vconf_get_str(VCONFKEY_ODE_CRYPTO_STATE);
-	if (file != NULL) {
-		_DBG("get %s : %s\n", VCONFKEY_ODE_CRYPTO_STATE, file);
-		if (!strcmp(file, DATA_ENCRYPTED)) {
-			if (vconf_notify_key_changed(VCONFKEY_ODE_CRYPTO_STATE,
-			     _data_encryption_cb, NULL) != 0) {
-				_ERR("[Error] vconf notify changed : %s", VCONFKEY_ODE_CRYPTO_STATE);
-			} else {
-				_DBG("waiting mount..!!");
-				if (_launch_pwlock() < 0) {
-					_ERR("launch pwlock error");
-				}
-				free(file);
-				return;
-			}
-		}
-		free(file);
-	}
-
-	/* change the launching order of pwlock and lock mgr in booting time */
-	/* TODO: menu screen is showed before phone lock is showed in booting time */
-	/* FIXME Here lock daemon start..!! */
 	r = start_lock_daemon(TRUE);
 	if (r == 1) {
 		if (vconf_notify_key_changed(VCONFKEY_IDLE_LOCK_STATE,
@@ -300,9 +217,7 @@ int main(int argc, char *argv[])
 	struct appdata ad;
 
 	WRITE_FILE_LOG("%s", "Main function is started in starter");
-#if 0
-	set_window_scale();	/* not in loop */
-#endif
+
     int heyfd = heynoti_init();
 	if (heyfd < 0) {
 		_ERR("Failed to heynoti_init[%d]", heyfd);

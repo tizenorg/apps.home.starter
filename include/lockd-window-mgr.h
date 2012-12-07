@@ -39,10 +39,4 @@ lockd_window_mgr_ready_lock(void *data, lockw_data * lockw,
 void lockd_window_mgr_finish_lock(lockw_data * lockw);
 
 lockw_data *lockd_window_init(void);
-
-void lockd_create_ug_window(void *data);
-
-void lockd_destroy_ug_window(void *data);
-
-void lockd_show_phonelock_alpha_ug(void *data);
 #endif				/* __LOCKD_WINDOW_MGR_H__ */

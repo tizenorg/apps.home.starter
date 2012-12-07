@@ -49,68 +49,11 @@ struct _lockw_data {
 	int phone_lock_app_pid;
 };
 
-Eina_Bool volume_key_expire_cb(void *pData)
-{
-	int api_ret = 0;
-	int vconf_val = 0;
-	lockw_data *lockw = (lockw_data *) pData;
-
-	_DBG("volume_key_expire_cb..!!");
-
-	lockw->volume_key_cnt = 0;
-
-	return ECORE_CALLBACK_CANCEL;
-}
-
 static Eina_Bool _lockd_window_key_down_cb(void *data, int type, void *event)
 {
 	Ecore_Event_Key *ev = event;
-	lockw_data *lockw = (lockw_data *) data;
-	int vconf_val = 0;
-	int ret = 0;
 
 	LOCKD_DBG("Key Down CB : %s", ev->keyname);
-
-	ret = vconf_get_int(VCONFKEY_MESSAGE_SOS_STATE, &vconf_val);
-
-	if(ret != 0)
-	{
-		LOCKD_ERR("_lockd_window_key_down_cb:VCONFKEY_MESSAGE_SOS_STATE FAILED");
-		return ECORE_CALLBACK_CANCEL;
-	}
-
-	if (!strcmp(ev->keyname, KEY_VOLUMEUP) || !strcmp(ev->keyname, KEY_VOLUMEDOWN)) {
-		if (vconf_val == VCONFKEY_MESSAGE_SOS_IDLE) {
-			if (lockw->volume_key_cnt == 0) {
-				lockw->volume_key_cnt++;
-				LOCKD_DBG("Volume key is pressed %d times", lockw->volume_key_cnt);
-				lockw->pTimerId = ecore_timer_add(SOS_KEY_INTERVAL, volume_key_expire_cb, lockw);
-			} else if (lockw->volume_key_cnt == SOS_KEY_COUNT) {
-				LOCKD_DBG("SOS msg invoked");
-				if (lockw->pTimerId != NULL) {
-					ecore_timer_del(lockw->pTimerId);
-					lockw->pTimerId = NULL;
-					lockw->volume_key_cnt =0;
-					vconf_set_int(VCONFKEY_MESSAGE_SOS_STATE, VCONFKEY_MESSAGE_SOS_INVOKED);
-					ecore_x_pointer_grab(lockw->lock_x_window);
-				}
-			} else {
-				if (lockw->pTimerId != NULL) {
-					ecore_timer_del(lockw->pTimerId);
-					lockw->pTimerId = NULL;
-					lockw->volume_key_cnt++;
-					LOCKD_DBG("Volume key is pressed %d times", lockw->volume_key_cnt);
-					lockw->pTimerId = ecore_timer_add(SOS_KEY_INTERVAL, volume_key_expire_cb, lockw);
-				}
-			}
-		}
-	} else if (!strcmp(ev->keyname, KEY_HOME)) {
-		if (vconf_val != VCONFKEY_MESSAGE_SOS_IDLE) {
-			LOCKD_DBG("Home key is pressed set to idle", lockw->volume_key_cnt);
-			vconf_set_int(VCONFKEY_MESSAGE_SOS_STATE, VCONFKEY_MESSAGE_SOS_IDLE);
-			ecore_x_pointer_ungrab();
-		}
-	}
 
 	return ECORE_CALLBACK_PASS_ON;
 }
@@ -152,283 +95,6 @@ _lockd_window_check_validate_rect(Ecore_X_Display * dpy, Ecore_X_Window window)
 	return ret;
 }
 
-static Evas_Object *lockd_create_main_window(const char *pkgname)
-{
-	Evas_Object *eo = NULL;
-	int w, h;
-	LOCKD_DBG("%s, %d", __func__, __LINE__);
-
-	eo = elm_win_add(NULL, pkgname, ELM_WIN_BASIC);
-	if (eo) {
-		elm_win_title_set(eo, pkgname);
-		elm_win_borderless_set(eo, EINA_TRUE);
-		ecore_x_window_size_get(ecore_x_window_root_first_get(),
-					&w, &h);
-		LOCKD_DBG("%s, %d, w = %d, h = %d", __func__, __LINE__, w, h);
-		evas_object_resize(eo, w, h);
-	}
-	return eo;
-}
-
-static Evas_Object *lockd_create_main_layout(Evas_Object * parent)
-{
-	Evas_Object *ly = NULL;
-	LOCKD_DBG("%s, %d", __func__, __LINE__);
-
-	ly = elm_layout_add(parent);
-	if (!ly) {
-		LOCKD_ERR("UI layout add error");
-		return NULL;
-	}
-
-	elm_layout_theme_set(ly, "layout", "application", "default");
-	evas_object_size_hint_weight_set(ly, EVAS_HINT_EXPAND,
-					 EVAS_HINT_EXPAND);
-	evas_object_show(ly);
-
-	elm_win_resize_object_add(parent, ly);
-	elm_win_indicator_mode_set(parent, ELM_WIN_INDICATOR_SHOW);
-
-	return ly;
-}
-
-static void _lockd_phone_lock_alpha_ug_layout_cb(ui_gadget_h ug,
-						 enum ug_mode mode, void *priv)
-{
-	lockw_data *lockw = (lockw_data *) priv;;
-	Evas_Object *base = NULL;
-	LOCKD_DBG("%s, %d", __func__, __LINE__);
-
-	if (!ug || !lockw)
-		return;
-
-	base = ug_get_layout(ug);
-	if (!base)
-		return;
-
-	switch (mode) {
-	case UG_MODE_FULLVIEW:
-		evas_object_size_hint_weight_set(base, EVAS_HINT_EXPAND,
-						 EVAS_HINT_EXPAND);
-		elm_win_resize_object_add(lockw->main_win, base);
-		ug_disable_effect(ug);	/* not use effect when destroy phone lock UG  */
-		evas_object_show(base);
-		break;
-	case UG_MODE_FRAMEVIEW:
-		/* elm_layout_content_set(lockw->main_layout, "content", base); *//* not used */
-		break;
-	default:
-		break;
-	}
-}
-
-static void _lockd_phone_lock_alpha_ug_result_cb(ui_gadget_h ug,
-						 service_h service, void *priv)
-{
-	int alpha;
-	const char *val1 = NULL, *val2 = NULL;
-	lockw_data *lockw = (lockw_data *) priv;;
-	LOCKD_DBG("%s, %d", __func__, __LINE__);
-
-	if (!ug || !lockw)
-		return;
-
-	service_get_extra_data(service, "name", &val1);
-
-	LOCKD_DBG("val1 = %s", val1);
-
-	if (val1 == NULL)
-		return;
-
-	service_get_extra_data(service, "result", &val2);
-
-		if (val2 == NULL)
-			return;
-
-		LOCKD_DBG("val2 = %s", val2);
-
-
-	if (!strcmp(val1, "phonelock-ug")) {
-		if (!strcmp(val2, "success")) {
-			LOCKD_DBG("password verified. Unlock!\n");
-		}
-	} else if (!strcmp(val1, "phonelock-ug-alpha")) {
-		alpha = atoi(val2);
-	}
-
-	if(val1 != NULL)
-		free(val1);
-
-	if(val2 != NULL)
-		free(val2);
-}
-
-static void _lockd_phone_lock_alpha_ug_destroy_cb(ui_gadget_h ug,
-						  void *priv)
-{
-	lockw_data *lockw = (lockw_data *) priv;;
-	LOCKD_DBG("%s, %d", __func__, __LINE__);
-
-	if (!ug || !lockw)
-		return;
-
-	ug_destroy(ug);
-	ug = NULL;
-	lockd_destroy_ug_window(lockw);
-	vconf_set_bool(VCONFKEY_LOCKSCREEN_PHONE_LOCK_VERIFICATION, TRUE);
-}
-
-static void _lockd_ug_window_set_win_prop(void *data, int type)
-{
-	Ecore_X_Window w;
-	Evas_Object *win = NULL;
-	lockw_data *lockw = (lockw_data *) data;;
-	LOCKD_DBG("%s, %d", __func__, __LINE__);
-
-	if (!lockw)
-		return;
-
-	win = lockw->main_win;
-
-	w = elm_win_xwindow_get(win);
-
-	if (type == ECORE_X_WINDOW_TYPE_NORMAL) {
-		ecore_x_netwm_window_type_set(w, ECORE_X_WINDOW_TYPE_NORMAL);
-	} else if (type == ECORE_X_WINDOW_TYPE_NOTIFICATION) {
-		ecore_x_netwm_window_type_set(w,
-					      ECORE_X_WINDOW_TYPE_NOTIFICATION);
-		utilx_set_system_notification_level(ecore_x_display_get(), w,
-						    UTILX_NOTIFICATION_LEVEL_NORMAL);
-	}
-}
-
-static void _lockd_ug_window_set_key_grab(void *data)
-{
-	Ecore_X_Window w;
-	int ret = 0;
-	Evas_Object *win = NULL;
-	lockw_data *lockw = (lockw_data *) data;;
-	LOCKD_DBG("%s, %d", __func__, __LINE__);
-
-	if (!lockw)
-		return;
-
-	win = lockw->main_win;
-	w = elm_win_xwindow_get(win);
-	ret = utilx_grab_key(ecore_x_display_get(), w, KEY_HOME, EXCLUSIVE_GRAB);
-	if(ret)
-	{
-		LOCKD_ERR("Key grab error : KEY_HOME");
-	}
-	ret = utilx_grab_key(ecore_x_display_get(), w, KEY_CONFIG, TOP_POSITION_GRAB);
-	if(ret)
-	{
-		LOCKD_ERR("Key grab error : KEY_CONFIG");
-	}
-}
-
-static void _lockd_ug_window_set_key_ungrab(void *data)
-{
-	Ecore_X_Window xwin;
-	Ecore_X_Display *disp = NULL;
-	lockw_data *lockw = (lockw_data *) data;;
-
-	if (!lockw)
-		return;
-
-	LOCKD_DBG("%s, %d", __func__, __LINE__);
-	disp = ecore_x_display_get();
-	xwin = elm_win_xwindow_get(lockw->main_win);
-
-	utilx_ungrab_key(disp, xwin, KEY_HOME);
-	utilx_ungrab_key(disp, xwin, KEY_CONFIG);
-}
-
-static void _lockd_ug_window_vconf_call_state_changed_cb(keynode_t * node,
-							 void *data)
-{
-	int api_ret = 0;
-	int vconf_val = 0;
-	lockw_data *lockw = (lockw_data *) data;
-
-	if (!lockw)
-		return;
-
-	LOCKD_DBG("%s, %d", __func__, __LINE__);
-	api_ret = vconf_get_int(VCONFKEY_CALL_STATE, &vconf_val);
-	if (api_ret != 0) {
-		LOCKD_DBG("fail to get vconf key %s value",
-			  VCONFKEY_CALL_STATE);
-	} else {
-		if (vconf_val == VCONFKEY_CALL_OFF) {
-			LOCKD_DBG("call off state..");
-			_lockd_ug_window_set_win_prop(lockw,
-						      ECORE_X_WINDOW_TYPE_NOTIFICATION);
-		} else {
-			LOCKD_DBG("call on state..");
-			_lockd_ug_window_set_win_prop(lockw,
-						      ECORE_X_WINDOW_TYPE_NORMAL);
-		}
-	}
-	return;
-}
-
-static void _lockd_ug_window_register_vconf_changed(void *data)
-{
-	LOCKD_DBG("%s, %d", __func__, __LINE__);
-	if (vconf_notify_key_changed
-	    (VCONFKEY_CALL_STATE, _lockd_ug_window_vconf_call_state_changed_cb,
-	     data) != 0) {
-		LOCKD_DBG("Fail to register");
-	}
-}
-
-static void _lockd_ug_window_unregister_vconf_changed(void *data)
-{
-	LOCKD_DBG("%s, %d", __func__, __LINE__);
-
-	if (vconf_ignore_key_changed
-	    (VCONFKEY_CALL_STATE,
-	     _lockd_ug_window_vconf_call_state_changed_cb) != 0) {
-		LOCKD_DBG("Fail to unregister");
-	}
-
-}
-
-void _lockd_window_transient_for_set(void *data)
-{
-	lockw_data *lockw = (lockw_data *) data;
-	Ecore_X_Window xwin_ug;
-	Ecore_X_Window xwin_lock;
-
-	if (!lockw)
-		return;
-
-	LOCKD_DBG("%s, %d", __func__, __LINE__);
-	xwin_ug = elm_win_xwindow_get(lockw->main_win);
-	xwin_lock = lockw->lock_x_window;
-
-	LOCKD_DBG("ug win id : %x, and lock win id is :%x", xwin_ug, xwin_lock);
-	ecore_x_icccm_transient_for_set(xwin_ug, xwin_lock);
-}
-
-Eina_Bool _lockd_window_set_window_property_timer_cb(void *data)
-{
-	Ecore_X_Window win = (Ecore_X_Window) data;
-	LOCKD_DBG
-	    ("[MINSU] win id(%x) set lock screen window property to notification and level low\n",
-	     win);
-
-	/*  Set notification type */
-	ecore_x_netwm_window_type_set(win, ECORE_X_WINDOW_TYPE_NOTIFICATION);
-
-	/*  Set notification's priority */
-	utilx_set_system_notification_level(ecore_x_display_get(), win,
-					    UTILX_NOTIFICATION_LEVEL_LOW);
-
-	return EINA_FALSE;
-}
-
 static Window get_user_created_window(Window win)
 {
 	Atom type_ret = 0;
@@ -459,7 +125,6 @@ static Window get_user_created_window(Window win)
 	XFree((void *)prop_ret);
 
 	return xid;
-
 }
 
 void
@@ -494,19 +159,13 @@ lockd_window_set_window_property(lockw_data * data, int lock_app_pid,
 			    ("This is lock application. Set window property. win id : %x",
 			     user_window);
 
-			/* window effect : fade in /out */
 			ecore_x_icccm_name_class_set(user_window, "LOCK_SCREEN",
 						     "LOCK_SCREEN");
-
-			/* Set notification type */
 			ecore_x_netwm_window_type_set(user_window,
 						      ECORE_X_WINDOW_TYPE_NOTIFICATION);
-
-			/* Set notification's priority */
 			utilx_set_system_notification_level(ecore_x_display_get
 							    (), user_window,
 							    UTILX_NOTIFICATION_LEVEL_NORMAL);
-			/* Set opaque state */
 			utilx_set_window_opaque_state(ecore_x_display_get(),
 						      user_window,
 						      UTILX_OPAQUE_STATE_ON);
@@ -567,7 +226,6 @@ lockd_window_mgr_ready_lock(void *data, lockw_data * lockw,
 		LOCKD_ERR("lockw is NULL.");
 		return;
 	}
-	/* Register window create CB */
 	lockw->h_wincreate =
 	    ecore_event_handler_add(ECORE_X_EVENT_WINDOW_CREATE, create_cb,
 				    data);
@@ -576,7 +234,6 @@ lockd_window_mgr_ready_lock(void *data, lockw_data * lockw,
 
 	lockw->volume_key_cnt = 0;
 
-	/* Register keydown event handler */
 	lockw->h_keydown =
 	    ecore_event_handler_add(ECORE_EVENT_KEY_DOWN,
 				    _lockd_window_key_down_cb, lockw);
@@ -590,7 +247,6 @@ void lockd_window_mgr_finish_lock(lockw_data * lockw)
 		LOCKD_ERR("lockw is NULL.");
 		return;
 	}
-	/* delete window create event handler */
 	if (lockw->h_wincreate != NULL) {
 		ecore_event_handler_del(lockw->h_wincreate);
 		lockw->h_wincreate = NULL;
@@ -602,7 +258,6 @@ void lockd_window_mgr_finish_lock(lockw_data * lockw)
 
 	ecore_x_pointer_ungrab();
 
-	/* delete keydown event handler */
 	if (lockw->h_keydown != NULL) {
 		ecore_event_handler_del(lockw->h_keydown);
 		lockw->h_keydown = NULL;
@@ -614,96 +269,10 @@ lockw_data *lockd_window_init(void)
 	lockw_data *lockw = NULL;
 	long pid;
 
-	/* Create lockd window data */
 	lockw = (lockw_data *) malloc(sizeof(lockw_data));
 	memset(lockw, 0x0, sizeof(lockw_data));
 
 	pid = getpid();
 
 	return lockw;
-}
-
-void lockd_create_ug_window(void *data)
-{
-	lockw_data *lockw = NULL;
-	LOCKD_DBG("%s, %d", __func__, __LINE__);
-
-	lockw = (lockw_data *) data;
-	if (!lockw) {
-		return;
-	}
-
-	lockd_destroy_ug_window(lockw);
-
-	/* create main window */
-	lockw->main_win = lockd_create_main_window(PACKAGE);
-
-	/* create main layout */
-	/* remove indicator in running time */
-	/* lockw->main_layout = lockd_create_main_layout(lockw->main_win); */
-	appcore_set_i18n(PACKAGE, NULL);
-	_lockd_ug_window_set_key_grab(lockw);
-	_lockd_ug_window_register_vconf_changed(lockw);
-	lockw->phone_lock_state = 1;
-}
-
-void lockd_destroy_ug_window(void *data)
-{
-	lockw_data *lockw = NULL;
-	LOCKD_DBG("%s, %d", __func__, __LINE__);
-
-	lockw = (lockw_data *) data;
-	if (!lockw) {
-		return;
-	}
-
-	_lockd_ug_window_set_key_ungrab(lockw);
-	_lockd_ug_window_unregister_vconf_changed(lockw);
-
-	if (lockw->main_win) {
-		evas_object_del(lockw->main_win);
-		lockw->main_win = NULL;
-	}
-	lockw->phone_lock_state = 0;
-}
-
-void lockd_show_phonelock_alpha_ug(void *data)
-{
-	lockw_data *lockw = NULL;
-	service_h service;
-	struct ug_cbs cbs = { 0, };
-	LOCKD_DBG("%s, %d", __func__, __LINE__);
-
-	lockw = (lockw_data *) data;
-	if (!lockw) {
-		return;
-	}
-
-	cbs.layout_cb = _lockd_phone_lock_alpha_ug_layout_cb;
-	cbs.result_cb = _lockd_phone_lock_alpha_ug_result_cb;
-	cbs.destroy_cb = _lockd_phone_lock_alpha_ug_destroy_cb;
-	cbs.priv = (void *)data;
-
-	service_create(&service);
-
-	service_add_extra_data(service, "phone-lock-type", "phone-lock");
-	service_add_extra_data(service, "window-type", "alpha");
-
-	elm_win_alpha_set(lockw->main_win, TRUE);
-	evas_object_color_set(lockw->main_win, 0, 0, 0, 0);
-
-	/* window effect : fade in /out */
-	ecore_x_icccm_name_class_set(elm_win_xwindow_get(lockw->main_win),
-				     "LOCK_SCREEN", "LOCK_SCREEN");
-
-	UG_INIT_EFL(lockw->main_win, UG_OPT_INDICATOR_ENABLE);
-	ug_create(NULL, "phone-lock-efl", UG_MODE_FULLVIEW, service, &cbs);
-	LOCKD_DBG("%s, %d", __func__, __LINE__);
-
-	service_destroy(service);
-
-	LOCKD_DBG("%s, %d", __func__, __LINE__);
-
-	evas_object_show(lockw->main_win);
-	_lockd_ug_window_set_win_prop(lockw, ECORE_X_WINDOW_TYPE_NOTIFICATION);
 }

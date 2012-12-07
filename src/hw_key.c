@@ -33,7 +33,6 @@
 #define TASKMGR_PKG_NAME "org.tizen.taskmgr"
 #define CAMERA_PKG_NAME "org.tizen.camera-app"
 #define CALLLOG_PKG_NAME "org.tizen.calllog"
-#define SEARCH_PKG_NAME "org.tizen.smartsearch"
 #define MUSIC_PLAYER_PKG_NAME "org.tizen.music-player"
 
 
@@ -115,17 +114,6 @@ static Eina_Bool _launch_home_screen(void *data)
 
 
 
-inline static void _launch_svoice(void)
-{
-	_D("Launch smartsearch");
-	if (aul_open_app(SEARCH_PKG_NAME) < 0)
-		_E("Cannot open Smart-search");
-
-	return;
-}
-
-
-
 inline static int _release_home_key(void)
 {
 	retv_if(NULL == key_info.long_press, EXIT_SUCCESS);
@@ -140,7 +128,6 @@ inline static int _release_home_key(void)
 	key_info.single_timer = NULL;
 
 	syspopup_destroy_all();
-	_launch_svoice();
 
 	return EXIT_SUCCESS;
 }
