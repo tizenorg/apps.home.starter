@@ -25,4 +25,4 @@
 void lockscreen_options_main_create_view(lockscreen_options_ug_data * ug_data);
 void lockscreen_options_main_update_view();
 
-#endif				/* __OPENLOCK_SETTING_MAIN_H__ */
+#endif

@@ -21,4 +21,4 @@
 
 int start_lock_daemon(int launch_lock);
 
-#endif				/* __LOCK_DAEMON_H__ */
+#endif

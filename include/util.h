@@ -28,7 +28,6 @@
 #define LOG_TAG "starter"
 #endif
 
-/* Log */
 #if !defined(_W)
 #define _W(fmt, arg...) LOGW("[%s:%d] "fmt"\n", __func__, __LINE__, ##arg)
 #endif
@@ -76,4 +75,4 @@
 	} \
 }
 
-#endif /* __MENU_DAEMON_UTIL_H__ */
+#endif

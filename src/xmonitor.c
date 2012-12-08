@@ -27,11 +27,6 @@
 #include <stdio.h>
 #include <sys/shm.h>
 #include <vconf.h>
-//#include <X11/Xatom.h>
-//#include <X11/Xlib.h>
-//#include <X11/Xutil.h>
-//#include <X11/extensions/Xcomposite.h>
-//#include <X11/extensions/XShm.h>
 
 #include "menu_daemon.h"
 #include "util.h"
@@ -198,11 +193,6 @@ static inline void _sniff_all_windows(void)
 		while (item->i < item->nr_of_wins) {
 			ret = item->wins[item->i];
 
-			/*
-			 * Now we don't need to care about visibility of window,
-			 * just check whether it is registered or not.
-			 * (ecore_x_window_visible_get(ret))
-			 */
 			ecore_x_window_client_sniff(ret);
 
 			new_item = malloc(sizeof(*new_item));
@@ -300,5 +290,3 @@ void xmonitor_fini(void)
 	ecore_event_handler_del(xmonitor_info.focus_out_handler);
 	xmonitor_info.focus_out_handler = NULL;
 }
-
-/* End of a file */

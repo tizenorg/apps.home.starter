@@ -22,4 +22,4 @@
 extern int xmonitor_init(void);
 extern void xmonitor_fini(void);
 
-#endif /* __MENU_DAEMON_XMONITOR_H__ */
+#endif

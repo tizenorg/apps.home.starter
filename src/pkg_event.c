@@ -84,7 +84,6 @@ directory_notify(void* data, Ecore_Fd_Handler* fd_handler)
 	len = read(fd, buf, read_size);
 	if (len < 0) {
 		free(buf);
-		// Stop monitoring about this invalid file descriptor
 		return ECORE_CALLBACK_CANCEL;
 	}
 
@@ -95,7 +94,6 @@ directory_notify(void* data, Ecore_Fd_Handler* fd_handler)
 		ssize_t idx;
 		int nev_name;
 
-		// 1. check the extension of a file
 		nev_name = strlen(event->name) - 1;
 		for (idx = 0; nev_name >= 0 && str_potksed[idx]; idx++) {
 			if (event->name[nev_name] != str_potksed[idx]) {
@@ -116,8 +114,7 @@ directory_notify(void* data, Ecore_Fd_Handler* fd_handler)
 		package[nev_name + 1] = '\0';
 		_D("Package : %s", package);
 
-		// add & update
-		if (event->mask & IN_CLOSE_WRITE || event->mask & IN_MOVED_TO) { // for moving
+		if (event->mask & IN_CLOSE_WRITE || event->mask & IN_MOVED_TO) {
 			ail_appinfo_h ai = NULL;
 			ail_error_e ret;
 
@@ -135,8 +132,7 @@ directory_notify(void* data, Ecore_Fd_Handler* fd_handler)
 				}
 			} else
 				;
-		// delete
-		} else if (event->mask & IN_DELETE) { // for deleting
+		} else if (event->mask & IN_DELETE) {
 			if (ail_desktop_remove(package) < 0) 
 				_D("Failed to remove a package (%s)", event->name);
 		} else {
@@ -266,7 +262,6 @@ void pkg_event_init()
 
 	s_desktop_notifier.handler = ecore_main_fd_handler_add(s_desktop_notifier.ifd, ECORE_FD_READ, directory_notify, NULL, NULL, NULL);
 	if (!s_desktop_notifier.handler) {
-		// TODO: Handles me.. EXCEPTION!!
 		_E("cannot add handler for inotify");
 	}
 }
@@ -301,6 +296,3 @@ void pkg_event_fini(void)
 		s_desktop_notifier.ifd = 0;
 	}
 }
-
-
-// End of a file

@@ -43,13 +43,6 @@ int errno;
 #define RELAUNCH_INTERVAL 100*1000
 #define RETRY_MAXCOUNT 30
 
-
-
-// Define prototype of the "hidden API of AUL"
-//extern int aul_listen_app_dead_signal(int (*func)(int signal, void *data), void *data);
-
-
-
 static struct info {
 	pid_t home_pid;
 	pid_t volume_pid;
@@ -101,7 +94,7 @@ static inline void _open_homescreen(const char *pkgname)
 	if (ret < 0 && strcmp(homescreen, HOME_SCREEN_PKG_NAME)) {
 		_E("cannot launch package %s", homescreen);
 
-		if (-1 == ret) { // -1 : AUL returns '-1' when there is no package name in DB.
+		if (-1 == ret) {
 			ret = aul_open_app(HOME_SCREEN_PKG_NAME);
 			if (ret < 0) {
 				_E("Failed to open a default home, %s(err:%d)", HOME_SCREEN_PKG_NAME, ret);
@@ -149,7 +142,7 @@ static void _show_cb(keynode_t* node, void *data)
 				_D("pid[%d] is terminated.", s_info.home_pid);
 
 				pid = s_info.home_pid;
-				s_info.home_pid = -1; /* to freeze the dead_cb */
+				s_info.home_pid = -1;
 
 				if (aul_terminate_pid(pid) != AUL_R_OK)
 					_E("Failed to terminate %d", s_info.home_pid);
@@ -207,13 +200,9 @@ static void _pkg_changed(keynode_t* node, void *data)
 		if (aul_terminate_pid(s_info.home_pid) != AUL_R_OK)
 			_D("Failed to terminate pid %d", s_info.home_pid);
 	} else {
-		/* If there is no running home */
 		_open_homescreen(pkgname);
 	}
 
-	/* NOTE: Dead callback will catch the termination of a current menuscreen 
-	 * _open_homescreen(pkgname);
-	 */
 	free(pkgname);
 	return;
 }
@@ -259,11 +248,9 @@ int menu_daemon_check_dead_signal(int pid)
 		return 0;
 
 	if (pid == s_info.home_pid) {
-		/* Relaunch */
 		_D("pkg_name : %s", pkgname);
 		_open_homescreen(pkgname);
 	} else if (pid == s_info.volume_pid) {
-		/* Relaunch */
 		_launch_volume();
 	} else {
 		_D("Unknown process, ignore it (pid %d, home pid %d)",
@@ -299,7 +286,6 @@ void menu_daemon_init(void *data)
 		_E("Failed to add callback for show event");
 
 	_pkg_changed(NULL, NULL);
-	// THIS ROUTINE IS FOR SAT.
 	vconf_set_int(VCONFKEY_IDLE_SCREEN_LAUNCHED, VCONFKEY_IDLE_SCREEN_LAUNCHED_TRUE);
 }
 
@@ -314,7 +300,3 @@ void menu_daemon_fini(void)
 	pkg_event_fini();
 	destroy_key_window();
 }
-
-
-
-// End of a file

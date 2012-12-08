@@ -69,8 +69,6 @@ static Evas_Object *create_frameview(Evas_Object * parent,
 {
 	Evas_Object *base = NULL;
 
-	/* Create Frame view */
-
 	return base;
 }
 
@@ -104,8 +102,6 @@ static void *on_create(ui_gadget_h ug, enum ug_mode mode, service_h service,
 		ug_data->base = create_fullview(parent, ug_data);
 	else
 		ug_data->base = create_frameview(parent, ug_data);
-
-	/* Add del callback for base layout */
 
 	return ug_data->base;
 }

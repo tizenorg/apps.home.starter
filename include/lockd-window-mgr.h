@@ -39,4 +39,4 @@ lockd_window_mgr_ready_lock(void *data, lockw_data * lockw,
 void lockd_window_mgr_finish_lock(lockw_data * lockw);
 
 lockw_data *lockd_window_init(void);
-#endif				/* __LOCKD_WINDOW_MGR_H__ */
+#endif

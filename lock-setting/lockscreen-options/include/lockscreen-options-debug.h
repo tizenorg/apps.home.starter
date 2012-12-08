@@ -36,7 +36,7 @@
 #define LOCKOPTIONS_DBG(fmt, args...) do{printf("[LOCKOPTIONS_DBG][%s(%d)] "fmt " \n", __FILE__, __LINE__, ##args);}while(0);
 #define LOCKOPTIONS_WARN(fmt, args...) do{printf("[LOCKOPTIONS_WARN][%s(%d)] "fmt " \n", __FILE__, __LINE__, ##args);}while(0);
 #define LOCKOPTIONS_ERR(fmt, args...) do{printf("[LOCKOPTIONS_ERR][%s(%d)] "fmt " \n", __FILE__, __LINE__, ##args);}while(0);
-#endif				/* LOCKD_USING_PLATFORM_DEBUG */
+#endif
 
 #ifndef TRUE
 #define TRUE 1
@@ -45,4 +45,4 @@
 #define FALSE 0
 #endif
 
-#endif				/* __OPENLOCK_SETTING_DEBUG_H__ */
+#endif

@@ -74,21 +74,13 @@ GOPTION="-u 5000 -f"
 
 vconftool set -t int "memory/starter/sequence" 0 -i $GOPTION
 vconftool set -t int "memory/starter/use_volume_key" 0 -i $GOPTION
-vconftool set -t string file/private/lockscreen/pkgname "org.tizen.draglock" -u 5000 -g 5000
+vconftool set -t string file/private/lockscreen/pkgname "org.tizen.lockscreen" -u 5000 -g 5000
 vconftool set -t int memory/idle_lock/state "0" -i $GOPTION
 vconftool set -t bool memory/lockscreen/phone_lock_verification 0 -i $GOPTION
 
-vconftool set -t bool db/lockscreen/shortcut_display 0 $GOPTION
 vconftool set -t bool db/lockscreen/event_notification_display 1 $GOPTION
-vconftool set -t bool db/lockscreen/context_aware_notification_display 0 $GOPTION
 vconftool set -t bool db/lockscreen/clock_display 1 $GOPTION
-vconftool set -t bool db/lockscreen/weather_display 1 $GOPTION
 vconftool set -t bool db/lockscreen/help_text_display 0 $GOPTION
-vconftool set -t bool db/lockscreen/camera_quick_access 0 $GOPTION
-vconftool set -t string file/lockscreen/shortcut1 "" $GOPTION
-vconftool set -t string file/lockscreen/shortcut2 "" $GOPTION
-vconftool set -t string file/lockscreen/shortcut3 "" $GOPTION
-vconftool set -t string file/lockscreen/shortcut4 "" $GOPTION
 
 vconftool set -t string memory/menuscreen/desktop "0" -i -f
 vconftool set -t int memory/idle-screen/is_idle_screen_launched "0" -i -u 5000 -f
@@ -110,15 +102,9 @@ sync
 %{_sysconfdir}/init.d/rd4starter
 %{_sysconfdir}/init.d/rd3starter
 %{_bindir}/starter
-/usr/ug/lib/libug-openlock-setting.so
-/usr/ug/lib/libug-openlock-setting.so.0.1.0
 /usr/ug/lib/libug-lockscreen-options.so
 /usr/ug/lib/libug-lockscreen-options.so.0.1.0
 /usr/ug/res/locale/*/LC_MESSAGES/*
-/usr/ug/res/edje/*
-/usr/ug/res/edje/ug-lockscreen-options-efl/*
-/usr/ug/res/images/*
-/usr/ug/res/images/ug-lockscreen-options-efl/*
 %{_libdir}/systemd/user/starter.service
 %{_libdir}/systemd/user/core-efl.target.wants/starter.service
 /usr/share/license/%{name}

@@ -23,4 +23,4 @@ void prop_string_set(const char *name, const char *value);
 void prop_int_set(const char *name, unsigned int val);
 void set_window_scale(void);
 
-#endif				/* __STARTER_X11_H__ */
+#endif

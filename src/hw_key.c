@@ -87,7 +87,7 @@ static Eina_Bool _launch_home_screen(void *data)
 		if (ret < 0) {
 			_E("cannot launch package %s(err:%d)", package, ret);
 
-			if (-1 == ret) { // -1 : AUL returns '-1' when there is no package name in DB.
+			if (-1 == ret) {
 				ret = aul_open_app(HOME_SCREEN_PKG_NAME);
 				if (ret < 0) {
 					_E("Failed to open a default home, %s(err:%d)", HOME_SCREEN_PKG_NAME, ret);
@@ -328,7 +328,3 @@ void destroy_key_window(void)
 
 	media_key_release();
 }
-
-
-
-// End of a file

@@ -61,4 +61,4 @@ typedef struct _lockscreen_options_ug_data {
 
 } lockscreen_options_ug_data;
 
-#endif				/* __lockscreen_options_H__ */
+#endif

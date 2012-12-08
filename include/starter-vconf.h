@@ -21,4 +21,4 @@
 
 #define VCONF_PRIVATE_LOCKSCREEN_PKGNAME "file/private/lockscreen/pkgname"
 
-#endif				/* __STARTER_VCONF_H__ */
+#endif

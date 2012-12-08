@@ -21,15 +21,15 @@
 #include <stdbool.h>
 
 #if !defined(PUBLIC)
-#define PUBLIC          __attribute__((visibility("default")))  /**<All other from outside modules can access this typed API */
+#define PUBLIC          __attribute__((visibility("default")))
 #endif
 
 #if !defined(PROTECTED)
-#define PROTECTED       __attribute__((visibility("hidden")))   /**<All other from outside modules can not access this directly */
+#define PROTECTED       __attribute__((visibility("hidden")))
 #endif
 
 #if !defined(PRIVATE)
-#define PRIVATE         __attribute__((visibility("internal"))) /**<Does not export APIs to the other. only can be accessed in this module */
+#define PRIVATE         __attribute__((visibility("internal")))
 #endif
 
 

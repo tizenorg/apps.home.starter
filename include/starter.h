@@ -22,7 +22,7 @@
 #include <sys/time.h>
 
 struct appdata {
-	struct timeval tv_start;	/* start time */
+	struct timeval tv_start;
 };
 
-#endif				/* __STARTER_H__ */
+#endif

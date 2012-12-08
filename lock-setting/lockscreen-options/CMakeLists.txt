@@ -15,10 +15,6 @@ SET(SRCS
 	./src/lockscreen-options.c
 	./src/lockscreen-options-util.c
 	./src/lockscreen-options-main.c
-	./src/lockscreen-options-shortcuts.c
-	./src/lockscreen-options-shortcuts-edit.c
-	./src/lockscreen-options-dualclock.c
-	./src/lockscreen-options-locktitle.c
 )
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/include)
@@ -37,18 +33,8 @@ SET(CMAKE_C_FLAGS ${CMAKE_CXX_FLAGS})
 
 ADD_DEFINITIONS("-DPREFIX=\"${CMAKE_INSTALL_PREFIX}\"")
 
-ADD_CUSTOM_TARGET(lockscreen-options.edj COMMAND edje_cc -id ${CMAKE_CURRENT_SOURCE_DIR}/res/images
-                        ${CMAKE_CURRENT_SOURCE_DIR}/res/edje/lockscreen-options.edc
-                        ${CMAKE_CURRENT_BINARY_DIR}/lockscreen-options.edj
-                DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/res/edje/lockscreen-options.edc
-)
-
 ADD_LIBRARY(${PROJECT_NAME} SHARED ${SRCS})
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES SOVERSION 0.1.0)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${pkgs_lock-screen-options_LDFLAGS})
 
-ADD_DEPENDENCIES(${PROJECT_NAME} lockscreen-options.edj)
-
 INSTALL(TARGETS ${PROJECT_NAME} DESTINATION ${LIBDIR})
-INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/lockscreen-options.edj DESTINATION ${EDJEDIR}/ug-lockscreen-options-efl)
-INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/res/images/ DESTINATION ${IMAGEDIR}/ug-lockscreen-options-efl)

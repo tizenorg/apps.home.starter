@@ -25,5 +25,3 @@ extern void menu_daemon_fini(void);
 extern bool menu_daemon_is_homescreen(pid_t pid);
 
 extern int menu_daemon_check_dead_signal(int pid);
-
-// End of a file

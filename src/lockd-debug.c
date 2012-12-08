@@ -28,7 +28,7 @@
 #include "lockd-debug.h"
 
 #define LINEMAX 256
-#define MAXFILELEN	1048576	/* 32000 */
+#define MAXFILELEN	1048576
 #define LOGFILE "/tmp/starter.log"
 
 void lockd_log_t(char *fmt, ...)
@@ -46,8 +46,7 @@ void lockd_log_t(char *fmt, ...)
 	time_t current_time = 0;
 	bzero((char *)&debugString, LINEMAX);
 	time(&current_time);
-	/* local_t = gmtime(&current_time); */
-	gmtime_r(&current_time, &local_t);	/* for prevent 53555 */
+	gmtime_r(&current_time, &local_t);
 	int len = snprintf(debugString, sizeof(debugString),
 			   "[%d-%02d-%02d, %02d:%02d:%02d]: ",
 			   local_t.tm_year + 1900, local_t.tm_mon + 1,
@@ -60,13 +59,10 @@ void lockd_log_t(char *fmt, ...)
 	}
 	len = g_strlcat(debugString, buf, LINEMAX);
 	if (len >= LINEMAX) {
-		/* TODO:ERROR handling */
 		return;
 	} else {
 		debugString[len] = '\n';
 	}
-	/* FIXME this is for permission.. later we should fix and remove this... */
-	/* system("chmod 666 "LOGFILE); */
 	if ((fd = fopen(LOGFILE, "at+")) == NULL) {
 		LOCKD_DBG("File fopen fail for writing Pwlock information");
 	} else {
@@ -80,7 +76,6 @@ void lockd_log_t(char *fmt, ...)
 				execl("/bin/rm", "rm", "-f", LOGFILE,
 				      (char *)0);
 			}
-			/* system("rm -rf "LOGFILE);  */
 		} else {
 			fseek(fd, 0l, SEEK_END);
 			fileLen = ftell(fd);
@@ -92,7 +87,6 @@ void lockd_log_t(char *fmt, ...)
 					execl("/bin/rm", "rm", "-f", LOGFILE,
 					      (char *)0);
 				}
-				/* system("rm -rf "LOGFILE); */
 			} else
 				fclose(fd);
 		}

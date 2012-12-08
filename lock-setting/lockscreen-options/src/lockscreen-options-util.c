@@ -26,35 +26,11 @@ const char *sys_str_table[] = {
 };
 
 const char *app_str_table[] = {
-	"IDS_ST_BODY_SHORTCUTS",
-	"IDS_ST_BODY_SET_SHORTCUTS_ON_LOCK_SCREEN",
-#if USE_TITLE_AND_CAMERA
-	"Lock screen title",
-	"Show title text on the lock screen",
-#endif
-	//"Event notifications",
 	"IDS_IDLE_MBODY_EVENT_NOTIFICATIONS",
-	//"View event notification on lock screen",
 	"IDS_IDLE_BODY_VIEW_EVENT_NOTIFICATIONS_ON_THE_LOCK_SCREEN",
-	"Context-aware notifications",
-	"View context-aware notifications on lock screen",
-#if USE_TITLE_AND_CAMERA
-	"IDS_ST_MBODY_CAMERA_QUICK_ACCESS",
-	"IDS_ST_BODY_TAP_AND_HOLD_THE_SCREEN_WHILE_ROTATING_THE_DEVICE_TO_OPEN_CAMERA",
-#endif
 	"IDS_ST_BODY_CLOCK",
-//	"Dual clock",
-//	"Show dual clock on lock screen when roaming",
-	"IDS_ST_BODY_WEATHER",
 	"IDS_IM_BODY_HELP_TEXT",
-	"IDS_ST_BODY_SHOW_HELP_TEXT_ON_LOCK_SCREEN",
-	"IDS_ST_BODY_SET_SHORTCUTS",
-	"IDS_ST_OPT_EDIT_SHORTCUTS",
-	"IDS_ST_BODY_SET_SHORTCUTS_ON_LOCK_SCREEN",
-	"IDS_ST_BODY_TAP_SHORTCUT_TO_ASSIGN_APPLICATION",
-	"IDS_ST_BODY_DRAG_AND_DROP_TO_CHANGE_ORDER",
-	"IDS_ST_BODY_SELECT_APPLICATION",
-	"Life Magazine"
+	"IDS_ST_BODY_SHOW_HELP_TEXT_ON_LOCK_SCREEN"
 };
 
 static Elm_Gen_Item_Class itc_underline;
@@ -158,10 +134,8 @@ char *lockscreen_optoins_get_string(int id)
 	char *str = NULL;
 
 	if (id < IDS_LOCKSCREEN_OPTIONS_SYSTEM_STRING_MAX) {
-		/* get system string */
 		str = dgettext("sys_string", sys_str_table[id]);
 	} else {
-		/* get application string */
 		str =
 		    dgettext(PKGNAME,
 			     app_str_table[id -

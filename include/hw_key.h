@@ -18,7 +18,3 @@
 
 extern void destroy_key_window(void);
 extern void create_key_window(void);
-
-
-
-// End of a file

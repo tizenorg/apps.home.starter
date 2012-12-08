@@ -61,4 +61,4 @@ void lockd_log_t(char *fmt, ...);
 #define FALSE 0
 #endif
 
-#endif				/* __LOCKD_DEBUG_H__ */
+#endif

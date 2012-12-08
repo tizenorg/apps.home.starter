@@ -35,4 +35,4 @@ void lockd_process_mgr_terminate_phone_lock(int phone_lock_pid);
 
 int lockd_process_mgr_check_lock(int pid);
 
-#endif				/* __LOCKD_PROCESS_MGR_H__ */
+#endif

@@ -47,7 +47,7 @@ static int phone_lock_pid;
 struct lockd_data {
 	int lock_app_pid;
 	int phone_lock_app_pid;
-	int lock_type;	/* 0:Normal, 1:Security,  2:Other */
+	int lock_type;
 	Eina_Bool request_recovery;
 	lockw_data *lockw;
 	GPollFD *gpollfd;
@@ -291,7 +291,7 @@ static void lockd_unlock_lockscreen(struct lockd_data *lockd)
 inline static void lockd_set_sock_option(int fd, int cli)
 {
 	int size;
-	struct timeval tv = { 1, 200 * 1000 };	/* 1.2 sec */
+	struct timeval tv = { 1, 200 * 1000 };
 
 	size = PHLOCK_SOCK_MAXBUFF;
 	setsockopt(fd, SOL_SOCKET, SO_SNDBUF, &size, sizeof(size));
@@ -305,7 +305,7 @@ static int lockd_create_sock(void)
 	struct sockaddr_un saddr;
 	int fd;
 
-	fd = socket(AF_UNIX, SOCK_STREAM, 0);	/* support above version 2.6.27 */
+	fd = socket(AF_UNIX, SOCK_STREAM, 0);
 	if (fd < 0) {
 		if (errno == EINVAL) {
 			fd = socket(AF_UNIX, SOCK_STREAM, 0);
@@ -334,7 +334,6 @@ static int lockd_create_sock(void)
 	}
 
 	if (chmod(saddr.sun_path, (S_IRWXU | S_IRWXG | S_IRWXO)) < 0) {
-		/* Flawfinder: ignore */
 		LOCKD_DBG("failed to change the socket permission");
 		return -1;
 	}
@@ -461,7 +460,6 @@ static int lockd_sock_handler(void *data)
 
 	lockd_set_sock_option(clifd, 1);
 
-	/* receive single packet from socket */
 	len = recv(clifd, cmd, PHLOCK_SOCK_MAXBUFF, 0);
 
 	if (cmd == NULL) {
@@ -478,10 +476,8 @@ static int lockd_sock_handler(void *data)
 
 	LOCKD_DBG("cmd %s", cmd);
 
-	/* Read command line of the PID from proc fs */
 	cmdline = lockd_read_cmdline_from_proc(cr.pid);
 	if (cmdline == NULL) {
-		/* It's weired. no file in proc file system, */
 		LOCKD_DBG("Error on opening /proc/%d/cmdline", cr.pid);
 		close(clifd);
 		return -1;

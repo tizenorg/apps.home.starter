@@ -42,10 +42,10 @@ struct _lockw_data {
 	Ecore_Event_Handler *h_wincreate;
 	Ecore_Event_Handler *h_winshow;
 
-	Ecore_Timer *pTimerId; /* volume key timer */
+	Ecore_Timer *pTimerId;
 	int volume_key_cnt;
 
-	int phone_lock_state;	/* 0 : disable, 1 : enable */
+	int phone_lock_state;
 	int phone_lock_app_pid;
 };
 

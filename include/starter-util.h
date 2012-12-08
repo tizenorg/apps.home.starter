@@ -32,4 +32,4 @@
 	fclose(fp);\
 } while (0)
 
-#endif				/* __STARTER_UTIL_H__ */
+#endif
