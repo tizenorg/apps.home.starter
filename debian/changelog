@@ -1,3 +1,12 @@
+starter (0.4.47) unstable; urgency=low
+
+  * Git: slp/pkgs/s/starter
+  * Tag: starter_0.4.47
+
+  * Package name : Package name : org.tizen.menu-screen -> cwkuromqdr.Home, org.tizen.lockscreen -> sgooa9p9fz.Lock
+
+ -- Jin Yoon <jinny.yoon@samsung.com>  Fri, 21 Dec 2012 20:31:10 +0900
+
 starter (0.4.6-2) unstable; urgency=low
 
   * temporal release for Orangey

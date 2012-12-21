@@ -1,6 +1,6 @@
 Name:       starter
 Summary:    starter
-Version: 0.4.46
+Version: 0.4.47
 Release:    1
 Group:      TO_BE/FILLED_IN
 License:    TO_BE/FILLED_IN
@@ -74,7 +74,7 @@ GOPTION="-u 5000 -f"
 
 vconftool set -t int "memory/starter/sequence" 0 -i $GOPTION
 vconftool set -t int "memory/starter/use_volume_key" 0 -i $GOPTION
-vconftool set -t string file/private/lockscreen/pkgname "org.tizen.lockscreen" -u 5000 -g 5000
+vconftool set -t string file/private/lockscreen/pkgname "sgooa9p9fz.Lock" -u 5000 -g 5000
 vconftool set -t int memory/idle_lock/state "0" -i $GOPTION
 vconftool set -t bool memory/lockscreen/phone_lock_verification 0 -i $GOPTION
 
