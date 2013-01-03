@@ -6,6 +6,7 @@ Group:      TO_BE/FILLED_IN
 License:    TO_BE/FILLED_IN
 Source0:    starter-%{version}.tar.gz
 Source1:    starter.service
+Source2:    starter.path
 Requires(post): /usr/bin/vconftool
 BuildRequires:  cmake
 BuildRequires:  pkgconfig(ail)
@@ -56,7 +57,8 @@ rm -rf %{buildroot}
 
 mkdir -p %{buildroot}%{_libdir}/systemd/user/core-efl.target.wants
 install -m 0644 %SOURCE1 %{buildroot}%{_libdir}/systemd/user/
-ln -s ../starter.service %{buildroot}%{_libdir}/systemd/user/core-efl.target.wants/starter.service
+install -m 0644 %SOURCE2 %{buildroot}%{_libdir}/systemd/user/
+ln -s ../starter.path %{buildroot}%{_libdir}/systemd/user/core-efl.target.wants/starter.path
 mkdir -p %{buildroot}/usr/share/license
 cp -f LICENSE %{buildroot}/usr/share/license/%{name}
 mkdir -p %{buildroot}/opt/data/home-daemon
@@ -105,7 +107,8 @@ sync
 /usr/ug/lib/libug-lockscreen-options.so
 /usr/ug/lib/libug-lockscreen-options.so.0.1.0
 /usr/ug/res/locale/*/LC_MESSAGES/*
+%{_libdir}/systemd/user/starter.path
 %{_libdir}/systemd/user/starter.service
-%{_libdir}/systemd/user/core-efl.target.wants/starter.service
+%{_libdir}/systemd/user/core-efl.target.wants/starter.path
 /usr/share/license/%{name}
 /opt/data/home-daemon
