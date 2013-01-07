@@ -210,8 +210,7 @@ static Eina_Bool lockd_app_show_cb(void *data, int type, void *event)
 	LOCKD_DBG("%s, %d", __func__, __LINE__);
 	lockd_window_set_window_property(lockd->lockw, lockd->lock_app_pid,
 					 event);
-	if (lockd->lock_type > 1)
-		ecore_idler_add(lockd_set_lock_state_cb, NULL);
+	ecore_idler_add(lockd_set_lock_state_cb, NULL);
 
 	return EINA_FALSE;
 }
