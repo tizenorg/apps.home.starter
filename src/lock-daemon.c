@@ -290,13 +290,21 @@ static void lockd_unlock_lockscreen(struct lockd_data *lockd)
 inline static void lockd_set_sock_option(int fd, int cli)
 {
 	int size;
+	int ret;
 	struct timeval tv = { 1, 200 * 1000 };
 
 	size = PHLOCK_SOCK_MAXBUFF;
-	setsockopt(fd, SOL_SOCKET, SO_SNDBUF, &size, sizeof(size));
-	setsockopt(fd, SOL_SOCKET, SO_RCVBUF, &size, sizeof(size));
-	if (cli)
-		setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+	ret = setsockopt(fd, SOL_SOCKET, SO_SNDBUF, &size, sizeof(size));
+	if(ret != 0)
+		return;
+	ret = setsockopt(fd, SOL_SOCKET, SO_RCVBUF, &size, sizeof(size));
+	if(ret != 0)
+		return;
+	if (cli) {
+		ret = setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+		if(ret != 0)
+			return;
+	}
 }
 
 static int lockd_create_sock(void)
@@ -329,11 +337,13 @@ static int lockd_create_sock(void)
 
 	if (bind(fd, (struct sockaddr *)&saddr, sizeof(saddr)) < 0) {
 		LOCKD_DBG("bind error");
+		close(fd);
 		return -1;
 	}
 
 	if (chmod(saddr.sun_path, (S_IRWXU | S_IRWXG | S_IRWXO)) < 0) {
 		LOCKD_DBG("failed to change the socket permission");
+		close(fd);
 		return -1;
 	}
 
@@ -341,6 +351,7 @@ static int lockd_create_sock(void)
 
 	if (listen(fd, 10) == -1) {
 		LOCKD_DBG("listen error");
+		close(fd);
 		return -1;
 	}
 
@@ -460,12 +471,7 @@ static int lockd_sock_handler(void *data)
 	lockd_set_sock_option(clifd, 1);
 
 	len = recv(clifd, cmd, PHLOCK_SOCK_MAXBUFF, 0);
-
-	if (cmd == NULL) {
-		LOCKD_DBG("recv error, cmd is NULL");
-		close(clifd);
-		return -1;
-	}
+	cmd[PHLOCK_SOCK_MAXBUFF - 1] = '\0';
 
 	if (len != strlen(cmd)) {
 		LOCKD_DBG("recv error %d %d", len, strlen(cmd));
@@ -502,6 +508,11 @@ static int lockd_sock_handler(void *data)
 			lockd->lock_type = 1;
 			lockd_launch_app_lockscreen(lockd);
 		}
+	}
+
+	if(cmdline != NULL) {
+		free(cmdline);
+		cmdline = NULL;
 	}
 
 	close(clifd);

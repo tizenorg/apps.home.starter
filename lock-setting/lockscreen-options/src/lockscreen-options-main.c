@@ -293,7 +293,7 @@ void lockscreen_options_main_create_view(lockscreen_options_ug_data * ug_data)
 		if (lockscreen_options_menu_item[i].glStyle ==
 		    ENUM_LOCKSCREEN_GENLIST_STYLE_1TEXT1ICON) {
 			itc = &(itc_menu_1text1icon);
-			item = elm_genlist_item_append(genlist,
+			elm_genlist_item_append(genlist,
 						       itc,
 						       &
 						       (lockscreen_options_menu_item
@@ -304,7 +304,7 @@ void lockscreen_options_main_create_view(lockscreen_options_ug_data * ug_data)
 		} else if(lockscreen_options_menu_item[i].glStyle ==
 		    ENUM_LOCKSCREEN_GENLIST_STYLE_2TEXT1ICON) {
 		    itc = &(itc_menu_2text1icon);
-			item = elm_genlist_item_append(genlist,
+			elm_genlist_item_append(genlist,
 						       itc,
 						       &
 						       (lockscreen_options_menu_item

@@ -221,6 +221,7 @@ int main(int argc, char *argv[])
     int heyfd = heynoti_init();
 	if (heyfd < 0) {
 		_ERR("Failed to heynoti_init[%d]", heyfd);
+		return -1;
 	}
 
 	int ret = heynoti_subscribe(heyfd, "power_off_start", _heynoti_event_power_off, NULL);

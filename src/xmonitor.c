@@ -59,12 +59,16 @@ static inline int _get_pid(Ecore_X_Window win)
 {
 	int pid;
 	Ecore_X_Atom atom;
-	unsigned char *in_pid;
+	unsigned char *in_pid = NULL;
 	int num;
 
 	atom = ecore_x_atom_get("X_CLIENT_PID");
 	if (ecore_x_window_prop_property_get(win, atom, ECORE_X_ATOM_CARDINAL,
 				sizeof(int), &in_pid, &num) == EINA_FALSE) {
+		if(in_pid != NULL) {
+			free(in_pid);
+			in_pid = NULL;
+		}
 		if (ecore_x_netwm_pid_get(win, &pid) == EINA_FALSE) {
 			_E("Failed to get PID from a window 0x%X", win);
 			return -EINVAL;

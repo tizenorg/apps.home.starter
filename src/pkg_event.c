@@ -64,6 +64,10 @@ directory_notify(void* data, Ecore_Fd_Handler* fd_handler)
 
 	fd = ecore_main_fd_handler_fd_get(fd_handler);
 	_D("There are some modification, ifd [%d]", fd);
+	if(fd < 0) {
+		_E("Failed to get fd");
+		return ECORE_CALLBACK_CANCEL;
+	}
 
 	if (ioctl(fd, FIONREAD, &read_size) < 0) {
 		_E("Failed to get q size");
@@ -86,6 +90,7 @@ directory_notify(void* data, Ecore_Fd_Handler* fd_handler)
 		free(buf);
 		return ECORE_CALLBACK_CANCEL;
 	}
+	buf[read_size - 1] = '\0';
 
 	while (i < len) {
 		struct inotify_event* event = (struct inotify_event*) &buf[i];
