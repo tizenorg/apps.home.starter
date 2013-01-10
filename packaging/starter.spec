@@ -92,15 +92,10 @@ vconftool set -t int memory/idle-screen/safemode "0" -i -f
 ln -sf /etc/init.d/rd4starter /etc/rc.d/rc4.d/S81starter
 ln -sf /etc/init.d/rd3starter /etc/rc.d/rc3.d/S43starter
 
-change_file_executable /etc/opt/init/starter.init.sh
-/etc/opt/init/starter.init.sh
-
-sync
 
 %files
 %manifest starter.manifest
 %defattr(-,root,root,-)
-/etc/opt/init/starter.init.sh
 %{_sysconfdir}/init.d/rd4starter
 %{_sysconfdir}/init.d/rd3starter
 %{_bindir}/starter
