@@ -1,3 +1,12 @@
+starter (0.4.51) unstable; urgency=low
+
+  * Git: slp/pkgs/s/starter
+  * Tag: starter_0.4.51
+
+  * EFL Menu-screen & Lock-screen
+
+ -- Jin Yoon <jinny.yoon@samsung.com>  Fri, 11 Jan 2013 15:35:10 +0900
+
 starter (0.4.47) unstable; urgency=low
 
   * Git: slp/pkgs/s/starter
