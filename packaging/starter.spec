@@ -76,7 +76,7 @@ GOPTION="-u 5000 -f"
 
 vconftool set -t int "memory/starter/sequence" 0 -i $GOPTION
 vconftool set -t int "memory/starter/use_volume_key" 0 -i $GOPTION
-vconftool set -t string file/private/lockscreen/pkgname "sgooa9p9fz.Lock" -u 5000 -g 5000
+vconftool set -t string file/private/lockscreen/pkgname "org.tizen.lockscreen" -u 5000 -g 5000 -f
 vconftool set -t int memory/idle_lock/state "0" -i $GOPTION
 vconftool set -t bool memory/lockscreen/phone_lock_verification 0 -i $GOPTION
 
