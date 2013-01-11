@@ -20,7 +20,7 @@
 #define __MENU_DAEMON_UTIL_H__
 #include <dlog.h>
 
-#define HOME_SCREEN_PKG_NAME "cwkuromqdr.Home"
+#define HOME_SCREEN_PKG_NAME "org.tizen.menu-screen"
 #define CONF_PATH_NUMBER 1024
 
 #ifdef  LOG_TAG

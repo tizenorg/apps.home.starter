@@ -25,9 +25,9 @@
 #include "lockd-process-mgr.h"
 #include "starter-vconf.h"
 
-#define LOCKD_DEFAULT_PKG_NAME "sgooa9p9fz.Lock"
-#define LOCKD_DEFAULT_LOCKSCREEN "sgooa9p9fz.Lock"
-#define LOCKD_PHONE_LOCK_PKG_NAME "sgooa9p9fz.Lock"
+#define LOCKD_DEFAULT_PKG_NAME "org.tizen.lockscreen"
+#define LOCKD_DEFAULT_LOCKSCREEN "org.tizen.lockscreen"
+#define LOCKD_PHONE_LOCK_PKG_NAME "org.tizen.lockscreen"
 #define RETRY_MAXCOUNT 30
 #define RELAUNCH_INTERVAL 100*1000
 
