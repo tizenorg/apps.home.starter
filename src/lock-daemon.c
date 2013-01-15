@@ -136,6 +136,13 @@ _lockd_notify_lock_state_cb(keynode_t * node, void *data)
 	}
 }
 
+static Eina_Bool lockd_set_lock_state_cb(void *data)
+{
+	LOCKD_DBG("%s, %d", __func__, __LINE__);
+	vconf_set_int(VCONFKEY_IDLE_LOCK_STATE, VCONFKEY_IDLE_LOCK);
+	return ECORE_CALLBACK_CANCEL;
+}
+
 static void
 _lockd_notify_phone_lock_verification_cb(keynode_t * node, void *data)
 {
@@ -177,13 +184,6 @@ static int lockd_app_dead_cb(int pid, void *data)
 	return 0;
 }
 
-static Eina_Bool lockd_set_lock_state_cb(void *data)
-{
-	LOCKD_DBG("%s, %d", __func__, __LINE__);
-	vconf_set_int(VCONFKEY_IDLE_LOCK_STATE, VCONFKEY_IDLE_LOCK);
-	return ECORE_CALLBACK_CANCEL;
-}
-
 static Eina_Bool lockd_app_create_cb(void *data, int type, void *event)
 {
 	struct lockd_data *lockd = (struct lockd_data *)data;
@@ -192,11 +192,13 @@ static Eina_Bool lockd_app_create_cb(void *data, int type, void *event)
 		return ECORE_CALLBACK_PASS_ON;
 	}
 	LOCKD_DBG("%s, %d", __func__, __LINE__);
-	lockd_window_set_window_effect(lockd->lockw, lockd->lock_app_pid,
-				       event);
-	lockd_window_set_window_property(lockd->lockw, lockd->lock_app_pid,
-					 event);
-
+	if (lockd_window_set_window_effect(lockd->lockw, lockd->lock_app_pid,
+				       event) == EINA_TRUE) {
+		if(lockd_window_set_window_property(lockd->lockw, lockd->lock_app_pid,
+						 event) == EINA_FALSE) {
+			LOCKD_ERR("window is not matched..!!");
+		}
+	}
 	return ECORE_CALLBACK_PASS_ON;
 }
 
@@ -208,11 +210,12 @@ static Eina_Bool lockd_app_show_cb(void *data, int type, void *event)
 		return EINA_TRUE;
 	}
 	LOCKD_DBG("%s, %d", __func__, __LINE__);
-	lockd_window_set_window_property(lockd->lockw, lockd->lock_app_pid,
-					 event);
-	if (lockd->lock_type > 1)
-		ecore_idler_add(lockd_set_lock_state_cb, NULL);
-
+	if (lockd_window_set_window_property(lockd->lockw, lockd->lock_app_pid,
+					 event)) {
+		if (lockd->lock_type > 1) {
+			ecore_idler_add(lockd_set_lock_state_cb, NULL);
+		}
+	}
 	return EINA_FALSE;
 }
 

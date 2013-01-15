@@ -21,11 +21,11 @@
 
 typedef struct _lockw_data lockw_data;
 
-void
+Eina_Bool
 lockd_window_set_window_property(lockw_data * data, int lock_app_pid,
 				 void *event);
 
-void
+Eina_Bool
 lockd_window_set_window_effect(lockw_data * data, int lock_app_pid,
 			       void *event);
 

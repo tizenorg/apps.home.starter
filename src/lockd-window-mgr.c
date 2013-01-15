@@ -125,9 +125,10 @@ static Window get_user_created_window(Window win)
 	XFree((void *)prop_ret);
 
 	return xid;
+
 }
 
-void
+Eina_Bool
 lockd_window_set_window_property(lockw_data * data, int lock_app_pid,
 				 void *event)
 {
@@ -137,7 +138,7 @@ lockd_window_set_window_property(lockw_data * data, int lock_app_pid,
 	int pid = 0;
 
 	if (!lockw) {
-		return;
+		return EINA_FALSE;
 	}
 	LOCKD_DBG("%s, %d", __func__, __LINE__);
 
@@ -145,7 +146,7 @@ lockd_window_set_window_property(lockw_data * data, int lock_app_pid,
 
 	int ret = ecore_x_netwm_pid_get(user_window, &pid);
 	if(ret != 1) {
-		return;
+		return EINA_FALSE;
 	}
 
 	LOCKD_DBG("Check PID(%d) window. (lock_app_pid : %d)\n", pid,
@@ -169,11 +170,13 @@ lockd_window_set_window_property(lockw_data * data, int lock_app_pid,
 			utilx_set_window_opaque_state(ecore_x_display_get(),
 						      user_window,
 						      UTILX_OPAQUE_STATE_ON);
+			return EINA_TRUE;
 		}
 	}
+	return EINA_FALSE;
 }
 
-void
+Eina_Bool
 lockd_window_set_window_effect(lockw_data * data, int lock_app_pid, void *event)
 {
 	Ecore_X_Event_Window_Create *e = event;
@@ -200,8 +203,10 @@ lockd_window_set_window_effect(lockw_data * data, int lock_app_pid, void *event)
 
 			utilx_set_window_effect_state(ecore_x_display_get(),
 						      user_window, 0);
+			return EINA_TRUE;
 		}
 	}
+	return EINA_FALSE;
 }
 
 void lockd_window_set_phonelock_pid(lockw_data * data, int phone_lock_pid)
