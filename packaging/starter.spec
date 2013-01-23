@@ -60,7 +60,7 @@ install -m 0644 %SOURCE1 %{buildroot}%{_libdir}/systemd/user/
 install -m 0644 %SOURCE2 %{buildroot}%{_libdir}/systemd/user/
 ln -s ../starter.path %{buildroot}%{_libdir}/systemd/user/core-efl.target.wants/starter.path
 mkdir -p %{buildroot}/usr/share/license
-cp -f LICENSE %{buildroot}/usr/share/license/%{name}
+cp -f LICENSE.Flora %{buildroot}/usr/share/license/%{name}
 mkdir -p %{buildroot}/opt/data/home-daemon
 
 %post
