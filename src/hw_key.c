@@ -61,12 +61,28 @@ static struct {
 
 static Eina_Bool _launch_taskmgr_cb(void* data)
 {
+	int val1 = -1;
+	int val2 = -1;
 	_D("Launch TASKMGR");
 
 	key_info.long_press = NULL;
 
-	if (aul_open_app(TASKMGR_PKG_NAME) < 0)
-		_E("Failed to launch the taskmgr");
+	if (vconf_get_int(VCONFKEY_PM_STATE, &val1) < 0) {
+		_E("Cannot get VCONFKEY_PM_STATE");
+		return ECORE_CALLBACK_CANCEL;
+	}
+	if (vconf_get_int(VCONFKEY_IDLE_LOCK_STATE, &val2) < 0) {
+		_E("Cannot get VCONFKEY_IDLE_LOCK_STATE");
+		return ECORE_CALLBACK_CANCEL;
+	}
+
+	if ((val1 == VCONFKEY_PM_STATE_NORMAL) && (val2 == VCONFKEY_IDLE_UNLOCK)) {
+		_D("LCD ON, UNLOCK state => launch taskmgr");
+		if (aul_open_app(TASKMGR_PKG_NAME) < 0)
+			_E("Failed to launch the taskmgr");
+	} else {
+		_D("Can't launch TASKMGR pm state : %d lock state : %d", val1, val2);
+	}
 
 	return ECORE_CALLBACK_CANCEL;
 }
@@ -245,7 +261,7 @@ static Eina_Bool _key_press_cb(void *data, int type, void *event)
 			key_info.long_press = NULL;
 		}
 
-		key_info.long_press = ecore_timer_add(0.5, _launch_taskmgr_cb, NULL);
+		key_info.long_press = ecore_timer_add(0.6, _launch_taskmgr_cb, NULL);
 		if (!key_info.long_press)
 			_E("Failed to add timer for long press detection");
 	} else if (!strcmp(ev->keyname, KEY_CANCEL)) {
