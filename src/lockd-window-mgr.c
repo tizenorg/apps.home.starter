@@ -186,7 +186,7 @@ lockd_window_set_window_effect(lockw_data * data, int lock_app_pid, void *event)
 	user_window = get_user_created_window((Window) (e->win));
 	int ret = ecore_x_netwm_pid_get(user_window, &pid);
 	if(ret != 1) {
-		return;
+		return EINA_FALSE;
 	}
 
 	LOCKD_DBG("%s, %d", __func__, __LINE__);
