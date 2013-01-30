@@ -1,3 +1,9 @@
+starter (0.4.54) unstable; urgency=low
+
+  *  update manifest file.
+
+ -- minho07.kim <minho07.kim@samsung.com>  Wed, 30 Jan 2013 19:03:11 +0900
+
 starter (0.4.51) unstable; urgency=low
 
   * Git: slp/pkgs/s/starter

@@ -7,7 +7,7 @@
 	</request>
 	<assign>
 		<filesystem path="/usr/bin/starter" label="starter" exec_label="starter" />
-		<filesystem path="/etc/init.d/rd3starter" label="_" exec_label="_" />
-		<filesystem path="/etc/init.d/rd4starter" label="_" exec_label="_" />
+		<filesystem path="/etc/init.d/rd3starter" label="_" exec_label=none />
+		<filesystem path="/etc/init.d/rd4starter" label="_" exec_label=none />
 	</assign>
 </manifest>
