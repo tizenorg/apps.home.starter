@@ -124,19 +124,21 @@ directory_notify(void* data, Ecore_Fd_Handler* fd_handler)
 			ail_error_e ret;
 
 			ret = ail_get_appinfo(package, &ai);
-			if (ai) ail_destroy_appinfo(ai);
+			if (AIL_ERROR_OK == ret || AIL_ERROR_NO_DATA == ret) {
+				if (ai) ail_destroy_appinfo(ai);
 
-
-			if (AIL_ERROR_NO_DATA == ret) {
-				if (ail_desktop_add(package) < 0) {
-					_D("Failed to add a new package (%s)", event->name);
+				if (AIL_ERROR_NO_DATA == ret) {
+					if (ail_desktop_add(package) < 0) {
+						_D("Failed to add a new package (%s)", event->name);
+					}
+				} else if (AIL_ERROR_OK == ret) {
+					if (ail_desktop_update(package) < 0) {
+						_D("Failed to add a new package (%s)", event->name);
+					}
 				}
-			} else if (AIL_ERROR_OK == ret) {
-				if (ail_desktop_update(package) < 0) {
-					_D("Failed to add a new package (%s)", event->name);
-				}
-			} else
-				;
+			} else {
+				_E("Failed to get appinfo");
+			}
 		} else if (event->mask & IN_DELETE) {
 			if (ail_desktop_remove(package) < 0) 
 				_D("Failed to remove a package (%s)", event->name);

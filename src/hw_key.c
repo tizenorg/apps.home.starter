@@ -17,6 +17,7 @@
 
 
 #include <ail.h>
+#include <aul.h>
 #include <bundle.h>
 #include <Elementary.h>
 #include <Ecore_X.h>

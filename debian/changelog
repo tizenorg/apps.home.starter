@@ -1,8 +1,17 @@
+starter (0.4.56) unstable; urgency=low
+
+  * Git: slp/pkgs/s/starter
+  * Tag: starter_0.4.56
+
+  * Do not destroy ail resources when ail returns an error code
+
+ -- Jin Yoon <jinny.yoon@samsung.com>  Mon, 04 Feb 2013 19:05:45 +0900
+
 starter (0.4.55) unstable; urgency=low
 
   * fix manifest file.
 
- -- minho07.kim <minho07.kim@samsung.com>  Thu, 30 Jan 2013 11:39:48 +0900
+ -- minho07.kim <minho07.kim@samsung.com>  Thu, 31 Jan 2013 11:34:26 +0900
 
 starter (0.4.54) unstable; urgency=low
 
