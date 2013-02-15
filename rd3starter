@@ -1,0 +1,26 @@
+#!/bin/sh
+
+# commented and this was moved to isf-panel-efl code
+#while [ ! -f /tmp/.wm_ready ];
+#do
+#	sleep 0.1
+#done
+
+while [ ! -f /tmp/amd_ready ];
+do
+        sleep 0.1
+done
+
+vconf_set_safemode()
+{
+	if [ -f /opt/etc/.safemode ]
+	then
+		vconftool set -t int memory/idle-screen/safemode "1" -i -f
+	else
+		vconftool set -t int memory/idle-screen/safemode "0" -i -f
+	fi
+}
+vconf_set_safemode
+
+echo -e "<2>[${_G}menu-daemon start${C_}]" > /dev/kmsg
+/usr/bin/starter &
