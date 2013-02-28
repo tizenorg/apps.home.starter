@@ -1,7 +1,7 @@
 Name:       starter
 Summary:    starter
 Version: 0.4.56
-Release:    1
+Release:    2
 Group:      TO_BE/FILLED_IN
 License:    TO_BE/FILLED_IN
 Source0:    starter-%{version}.tar.gz
