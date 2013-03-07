@@ -30,6 +30,7 @@
 #include <vconf.h>
 #include <heynoti.h>
 #include <signal.h>
+#include <system_info.h>
 
 #include "starter.h"
 #include "starter-util.h"
@@ -45,6 +46,7 @@
 #define DEFAULT_THEME "tizen"
 #define PWLOCK_PATH "/usr/apps/org.tizen.pwlock/bin/pwlock"
 #define PWLOCK_PKG_NAME "org.tizen.pwlock"
+#define QP_EMUL_STR      "Emulator"
 
 static void lock_menu_screen(void)
 {
@@ -82,11 +84,34 @@ static void _set_elm_theme(void)
 		free(vstr);
 }
 
+static int _check_emul()
+{
+	int is_emul = 0;
+	char *info = NULL;
+
+	if (system_info_get_value_string(SYSTEM_INFO_KEY_MODEL, &info) == 0) {
+		if (info == NULL) return 0;
+		if (!strncmp(QP_EMUL_STR, info, strlen(info))) {
+			is_emul = 1;
+		}
+	}
+
+	if (info != NULL) free(info);
+
+	return is_emul;
+}
+
 static int _launch_pwlock(void)
 {
 	int r;
 
 	_DBG("%s", __func__);
+
+	if(_check_emul()) {
+		_DBG("Emulator => skip pwlock");
+		vconf_set_int(VCONFKEY_STARTER_SEQUENCE, 1);
+		return 0;
+	}
 
 	r = aul_launch_app(PWLOCK_PKG_NAME, NULL);
 	if (r < 0) {

@@ -1,6 +1,6 @@
 Name:       starter
 Summary:    starter
-Version: 0.4.56
+Version: 0.4.57
 Release:    2
 Group:      TO_BE/FILLED_IN
 License:    TO_BE/FILLED_IN
@@ -33,6 +33,7 @@ BuildRequires:  pkgconfig(vconf)
 BuildRequires:  pkgconfig(x11)
 BuildRequires:  pkgconfig(xcomposite)
 BuildRequires:  pkgconfig(xext)
+BuildRequires:  pkgconfig(capi-system-info)
 BuildRequires:  cmake
 BuildRequires:  edje-bin
 BuildRequires: gettext-tools

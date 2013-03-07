@@ -39,6 +39,7 @@ pkg_check_modules(pkgs REQUIRED
 	ui-gadget-1
 	bundle
 	capi-appfw-application
+	capi-system-info
 )
 
 FOREACH(flag ${pkgs_CFLAGS})
