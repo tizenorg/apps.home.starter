@@ -85,7 +85,6 @@ vconftool set -t bool db/lockscreen/event_notification_display 1 $GOPTION
 vconftool set -t bool db/lockscreen/clock_display 1 $GOPTION
 vconftool set -t bool db/lockscreen/help_text_display 0 $GOPTION
 
-vconftool set -t string memory/menuscreen/desktop "0" -i -f
 vconftool set -t int memory/idle-screen/is_idle_screen_launched "0" -i -u 5000 -f
 vconftool set -t int memory/idle-screen/top "0" -i -f
 vconftool set -t int memory/idle-screen/safemode "0" -i -f
