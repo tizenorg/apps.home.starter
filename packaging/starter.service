@@ -1,7 +1,7 @@
 [Unit]
 Description=Start the "starter" program
 Before=core-efl.target
-After=xorg.target
+After=boot-animation.service
 
 [Service]
 ExecStart=/usr/bin/starter
