@@ -177,7 +177,6 @@ static void _init(struct appdata *ad)
 {
 	int r;
 	struct sigaction act;
-	char *file = NULL;
 
 	memset(&act,0x00,sizeof(struct sigaction));
 	act.sa_sigaction = _signal_handler;

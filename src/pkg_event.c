@@ -286,11 +286,7 @@ void pkg_event_fini(void)
 	for (i = 0; i < CONF_PATH_NUMBER; i ++) {
 		if (paths[i].wd) {
 			if (inotify_rm_watch(s_desktop_notifier.ifd, paths[i].wd) < 0) {
-				char log[BUFSZE] = {0,};
-				int ret;
-
-				ret = strerror_r(errno, log, sizeof(log));
-				_E("Error: %s", ret == 0? log : "unknown error");
+				_E("Error: %s", strerror(errno));
 			}
 			paths[i].wd = 0;
 		}
