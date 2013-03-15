@@ -1,3 +1,12 @@
+starter (0.4.58) unstable; urgency=low
+
+  * Git: slp/pkgs/s/starter
+  * Tag: starter_0.4.58
+
+  *  Remove an unused vconf setting
+
+ -- Jin Yoon <jinny.yoon@samsung.com>  Mon, 11 Mar 2013 16:23:50 +0900
+
 starter (0.4.56) unstable; urgency=low
 
   * Git: slp/pkgs/s/starter

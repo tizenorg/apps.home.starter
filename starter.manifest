@@ -9,5 +9,8 @@
 		<filesystem path="/usr/bin/starter" label="starter" exec_label="starter" />
 		<filesystem path="/etc/init.d/rd3starter" label="_" exec_label="none" />
 		<filesystem path="/etc/init.d/rd4starter" label="_" exec_label="none" />
+		<filesystem path="/usr/lib/systemd/user/starter.path" label="_" exec_label="none" />
+		<filesystem path="/usr/lib/systemd/user/starter.service" label="_" exec_label="none" />
+		<filesystem path="/usr/lib/systemd/user/core-efl.target.wants/starter.path" label="_" exec_label="none" />
 	</assign>
 </manifest>

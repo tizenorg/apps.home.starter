@@ -1,7 +1,7 @@
 Name:       starter
 Summary:    starter
-Version: 0.4.56
-Release:    1
+Version: 0.4.58
+Release:    2
 Group:      TO_BE/FILLED_IN
 License:    TO_BE/FILLED_IN
 Source0:    starter-%{version}.tar.gz
@@ -33,6 +33,7 @@ BuildRequires:  pkgconfig(vconf)
 BuildRequires:  pkgconfig(x11)
 BuildRequires:  pkgconfig(xcomposite)
 BuildRequires:  pkgconfig(xext)
+BuildRequires:  pkgconfig(capi-system-info)
 BuildRequires:  cmake
 BuildRequires:  edje-bin
 BuildRequires: gettext-tools
@@ -84,7 +85,6 @@ vconftool set -t bool db/lockscreen/event_notification_display 1 $GOPTION
 vconftool set -t bool db/lockscreen/clock_display 1 $GOPTION
 vconftool set -t bool db/lockscreen/help_text_display 0 $GOPTION
 
-vconftool set -t string memory/menuscreen/desktop "0" -i -f
 vconftool set -t int memory/idle-screen/is_idle_screen_launched "0" -i -u 5000 -f
 vconftool set -t int memory/idle-screen/top "0" -i -f
 vconftool set -t int memory/idle-screen/safemode "0" -i -f
