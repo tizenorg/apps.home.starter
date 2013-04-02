@@ -1,3 +1,12 @@
+starter (0.4.59) unstable; urgency=low
+
+  * Git: slp/pkgs/s/starter
+  * Tag: starter_0.4.59
+
+  * Modify the service file : remove an unused field
+
+ -- Jin Yoon <jinny.yoon@samsung.com>  Tue, 02 Apr 2013 13:08:59 +0900
+
 starter (0.4.58) unstable; urgency=low
 
   * Git: slp/pkgs/s/starter
