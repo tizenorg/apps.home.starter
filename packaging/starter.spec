@@ -47,7 +47,7 @@ Description: Starter
 %prep
 %setup -q
 
-cmake . -DCMAKE_INSTALL_PREFIX=%{_prefix}
+%cmake .
 
 %build
 
