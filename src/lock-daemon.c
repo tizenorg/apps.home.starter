@@ -173,7 +173,7 @@ static int lockd_app_dead_cb(int pid, void *data)
 
 	struct lockd_data *lockd = (struct lockd_data *)data;
 
-	if (pid == lockd->lock_app_pid && lockd->lock_type == 0) {
+	if (pid == lockd->lock_app_pid && lockd->lock_type == 2) {
 		LOCKD_DBG("lock app(pid:%d) is destroyed.", pid);
 
 		lockd_unlock_lockscreen(lockd);
@@ -182,6 +182,7 @@ static int lockd_app_dead_cb(int pid, void *data)
 	menu_daemon_check_dead_signal(pid);
 
 	return 0;
+
 }
 
 static Eina_Bool lockd_app_create_cb(void *data, int type, void *event)
