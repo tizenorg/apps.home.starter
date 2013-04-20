@@ -35,7 +35,7 @@ static char *_lockd_process_mgr_get_pkgname(void)
 {
 	char *pkgname = NULL;
 
-	pkgname = vconf_get_str(VCONF_PRIVATE_LOCKSCREEN_PKGNAME);
+	pkgname = vconf_get_str(VCONFKEY_SETAPPL_3RD_LOCK_PKG_NAME_STR);
 
 	LOCKD_DBG("pkg name is %s", pkgname);
 

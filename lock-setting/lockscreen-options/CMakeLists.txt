@@ -24,12 +24,11 @@ INCLUDE(FindPkgConfig)
 pkg_check_modules(pkgs_lock-screen-options REQUIRED elementary ui-gadget-1 edje evas ail capi-appfw-application)
 
 FOREACH(flag ${pkgs_lock-screen-options_CFLAGS})
-	SET(EXTRA_CXXFLAGS "${EXTRA_CXXFLAGS} ${flag}")
+	SET(EXTRA_CFLAGS "${EXTRA_CFLAGS} ${flag}")
 ENDFOREACH(flag)
 
-SET(EXTRA_CXXFLAGS "${EXTRA_CXXFLAGS} -fvisibility=hidden -Wall")
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EXTRA_CXXFLAGS}")
-SET(CMAKE_C_FLAGS ${CMAKE_CXX_FLAGS})
+SET(EXTRA_CFLAGS "${EXTRA_CFLAGS} -fvisibility=hidden -Wall")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_CFLAGS}")
 
 ADD_DEFINITIONS("-DPREFIX=\"${CMAKE_INSTALL_PREFIX}\"")
 
