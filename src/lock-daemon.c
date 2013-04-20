@@ -173,7 +173,7 @@ static int lockd_app_dead_cb(int pid, void *data)
 
 	struct lockd_data *lockd = (struct lockd_data *)data;
 
-	if (pid == lockd->lock_app_pid && lockd->lock_type == 2) {
+	if (pid == lockd->lock_app_pid) {
 		LOCKD_DBG("lock app(pid:%d) is destroyed.", pid);
 
 		lockd_unlock_lockscreen(lockd);
@@ -212,10 +212,8 @@ static Eina_Bool lockd_app_show_cb(void *data, int type, void *event)
 	}
 	LOCKD_DBG("%s, %d", __func__, __LINE__);
 	if (lockd_window_set_window_property(lockd->lockw, lockd->lock_app_pid,
-					 event)) {
-		if (lockd->lock_type > 1) {
-			ecore_idler_add(lockd_set_lock_state_cb, NULL);
-		}
+				event)) {
+		ecore_idler_add(lockd_set_lock_state_cb, NULL);
 	}
 	return EINA_FALSE;
 }
@@ -249,37 +247,15 @@ static int lockd_launch_app_lockscreen(struct lockd_data *lockd)
 		return 0;
 	}
 
-	if (lockd->lock_type == 0) {
-		lockd->lock_app_pid =
-		    lockd_process_mgr_start_normal_lock(lockd, lockd_app_dead_cb);
-		if (lockd->lock_app_pid < 0)
-			return 0;
-		lockd_window_mgr_finish_lock(lockd->lockw);
-		lockd_window_mgr_ready_lock(lockd, lockd->lockw, lockd_app_create_cb,
-					    lockd_app_show_cb);
-	} else if (lockd->lock_type == 1) {
-		vconf_set_bool(VCONFKEY_LOCKSCREEN_PHONE_LOCK_VERIFICATION, FALSE);
-		if (lockd_process_mgr_check_lock(lockd->phone_lock_app_pid) == TRUE) {
-			LOCKD_DBG("phone lock App is already running.");
-			if (lockd->request_recovery == FALSE)
-				return 1;
-		}
-		lockd->phone_lock_app_pid = lockd_process_mgr_start_phone_lock();
+	lockd->lock_app_pid =
+		lockd_process_mgr_start_lock(lockd, lockd_app_dead_cb,
+				lockd->lock_type);
+	if (lockd->lock_app_pid < 0)
+		return 0;
+	lockd_window_mgr_finish_lock(lockd->lockw);
+	lockd_window_mgr_ready_lock(lockd, lockd->lockw, lockd_app_create_cb,
+			lockd_app_show_cb);
 
-		phone_lock_pid = lockd->phone_lock_app_pid;
-		LOCKD_DBG("%s, %d, phone_lock_pid = %d", __func__, __LINE__,
-			  phone_lock_pid);
-		lockd_window_set_phonelock_pid(lockd->lockw, phone_lock_pid);
-	} else {
-		lockd->lock_app_pid =
-		    lockd_process_mgr_start_lock(lockd, lockd_app_dead_cb,
-						 lockd->lock_type);
-		if (lockd->lock_app_pid < 0)
-			return 0;
-		lockd_window_mgr_finish_lock(lockd->lockw);
-		lockd_window_mgr_ready_lock(lockd, lockd->lockw, lockd_app_create_cb,
-					    lockd_app_show_cb);
-	}
 	return 1;
 }
 
@@ -680,8 +656,6 @@ int start_lock_daemon(int launch_lock)
 	lock_type = _lockd_get_lock_type();
 	if (lock_type == 1) {
 		lockd->request_recovery = FALSE;
-	} else if (lock_type == 2) {
-		lock_type = 0;
 	}
 	lockd->lock_type = lock_type;
 	ret = lockd_launch_app_lockscreen(lockd);

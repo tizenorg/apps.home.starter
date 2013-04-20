@@ -1,6 +1,6 @@
 Name:       starter
 Summary:    starter
-Version: 0.4.59
+Version: 0.4.60
 Release:    3
 Group:      TO_BE/FILLED_IN
 License:    TO_BE/FILLED_IN
