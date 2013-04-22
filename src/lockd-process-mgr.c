@@ -65,6 +65,7 @@ int lockd_process_mgr_start_lock(void *data, int (*dead_cb) (int, void *),
 {
 	char *lock_app_path = NULL;
 	int pid;
+	int ret;
 
 	lock_app_path = _lockd_process_mgr_get_pkgname();
 
@@ -80,6 +81,10 @@ int lockd_process_mgr_start_lock(void *data, int (*dead_cb) (int, void *),
 			usleep(RELAUNCH_INTERVAL);
 		} else if (pid == AUL_R_ERROR) {
 			LOCKD_DBG("launch[%s] is failed, launch default lock screen", lock_app_path);
+			ret = vconf_set_str(VCONFKEY_SETAPPL_3RD_LOCK_PKG_NAME_STR, LOCKD_DEFAULT_LOCKSCREEN);
+			if (ret != 0) {
+				LOCKD_ERR("set failed");
+			}
 			pid = aul_launch_app(LOCKD_DEFAULT_LOCKSCREEN, NULL);
 			if (pid >0) {
 				return pid;

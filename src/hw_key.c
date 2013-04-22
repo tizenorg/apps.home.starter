@@ -17,7 +17,6 @@
 
 
 #include <ail.h>
-#include <aul.h>
 #include <bundle.h>
 #include <Elementary.h>
 #include <Ecore_X.h>
@@ -29,6 +28,7 @@
 #include <system/media_key.h>
 
 #include "hw_key.h"
+#include "menu_daemon.h"
 #include "util.h"
 
 #define TASKMGR_PKG_NAME "org.tizen.taskmgr"
@@ -79,7 +79,7 @@ static Eina_Bool _launch_taskmgr_cb(void* data)
 
 	if ((val1 == VCONFKEY_PM_STATE_NORMAL) && (val2 == VCONFKEY_IDLE_UNLOCK)) {
 		_D("LCD ON, UNLOCK state => launch taskmgr");
-		if (aul_open_app(TASKMGR_PKG_NAME) < 0)
+		if (menu_daemon_open_app(TASKMGR_PKG_NAME) < 0)
 			_E("Failed to launch the taskmgr");
 	} else {
 		_D("Can't launch TASKMGR pm state : %d lock state : %d", val1, val2);
@@ -90,42 +90,11 @@ static Eina_Bool _launch_taskmgr_cb(void* data)
 
 
 
-static Eina_Bool _launch_home_screen(void *data)
+static Eina_Bool _launch_by_home_key(void *data)
 {
-	char *package;
-	int ret;
-
-	syspopup_destroy_all();
 	key_info.single_timer = NULL;
-
-	package = vconf_get_str(VCONFKEY_SETAPPL_SELECTED_PACKAGE_NAME);
-	if (package) {
-		ret = aul_open_app(package);
-		if (ret < 0) {
-			_E("cannot launch package %s(err:%d)", package, ret);
-
-			if (-1 == ret) {
-				ret = aul_open_app(HOME_SCREEN_PKG_NAME);
-				if (ret < 0) {
-					_E("Failed to open a default home, %s(err:%d)", HOME_SCREEN_PKG_NAME, ret);
-				}
-			}
-		}
-
-		free(package);
-	} else {
-		ret = aul_open_app(HOME_SCREEN_PKG_NAME);
-		if (ret < 0) _E("Cannot open default home");
-	}
-
-	if (ret > 0) {
-		if (-1 == sysconf_set_mempolicy_bypid(ret, OOM_IGNORE)) {
-			_E("Cannot set the memory policy for Home-screen(%d)", ret);
-		} else {
-			_E("Set the memory policy for Home-screen(%d)", ret);
-		}
-	}
-
+	syspopup_destroy_all();
+	menu_daemon_open_homescreen(NULL);
 	return ECORE_CALLBACK_CANCEL;
 }
 
@@ -138,7 +107,7 @@ inline static int _release_home_key(void)
 	key_info.long_press = NULL;
 
 	if (NULL == key_info.single_timer) {
-		key_info.single_timer = ecore_timer_add(0.3, _launch_home_screen, NULL);
+		key_info.single_timer = ecore_timer_add(0.3, _launch_by_home_key, NULL);
 		return EXIT_SUCCESS;
 	}
 	ecore_timer_del(key_info.single_timer);
@@ -153,24 +122,24 @@ inline static int _release_home_key(void)
 
 inline static void _release_multimedia_key(const char *value)
 {
-	bundle *b;
-	int ret;
-
-	_D("Multimedia key is released with %s", value);
 	ret_if(NULL == value);
 
+	_D("Multimedia key is released with %s", value);
+
+	bundle *b;
 	b = bundle_create();
 	if (!b) {
 		_E("Cannot create bundle");
 		return;
 	}
-
 	bundle_add(b, "multimedia_key", value);
-	ret = aul_launch_app(MUSIC_PLAYER_PKG_NAME, b);
-	bundle_free(b);
 
+	int ret;
+	ret = menu_daemon_launch_app(MUSIC_PLAYER_PKG_NAME, b);
 	if (ret < 0)
 		_E("Failed to launch the running apps, ret : %d", ret);
+
+	bundle_free(b);
 }
 
 
@@ -243,11 +212,11 @@ static Eina_Bool _key_press_cb(void *data, int type, void *event)
 
 	if (!strcmp(ev->keyname, KEY_SEND)) {
 		_D("Launch calllog");
-		if (aul_open_app(CALLLOG_PKG_NAME) < 0)
+		if (menu_daemon_open_app(CALLLOG_PKG_NAME) < 0)
 			_E("Failed to launch %s", CALLLOG_PKG_NAME);
 	} else if(!strcmp(ev->keyname, KEY_CONFIG)) {
 		_D("Launch camera");
-		if (aul_open_app(CAMERA_PKG_NAME) < 0)
+		if (menu_daemon_open_app(CAMERA_PKG_NAME) < 0)
 			_E("Failed to launch %s", CAMERA_PKG_NAME);
 	} else if (!strcmp(ev->keyname, KEY_HOME)) {
 		if (vconf_get_int(VCONFKEY_IDLE_LOCK_STATE, &val) < 0) {
@@ -262,7 +231,7 @@ static Eina_Bool _key_press_cb(void *data, int type, void *event)
 			key_info.long_press = NULL;
 		}
 
-		key_info.long_press = ecore_timer_add(0.6, _launch_taskmgr_cb, NULL);
+		key_info.long_press = ecore_timer_add(0.5, _launch_taskmgr_cb, NULL);
 		if (!key_info.long_press)
 			_E("Failed to add timer for long press detection");
 	} else if (!strcmp(ev->keyname, KEY_CANCEL)) {
@@ -345,3 +314,7 @@ void destroy_key_window(void)
 
 	media_key_release();
 }
+
+
+
+// End of a file

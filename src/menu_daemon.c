@@ -20,14 +20,16 @@
 #include <aul.h>
 #include <db-util.h>
 #include <Elementary.h>
+#include <errno.h>
 #include <fcntl.h>
+#include <pkgmgr-info.h>
 #include <stdio.h>
 #include <sysman.h>
 #include <syspopup_caller.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <unistd.h>
 #include <vconf.h>
-#include <errno.h>
 
 #include "hw_key.h"
 #include "pkg_event.h"
@@ -55,6 +57,45 @@ static struct info {
 
 
 
+#define RETRY_COUNT 5
+int menu_daemon_open_app(const char *pkgname)
+{
+	register int i;
+	int r = AUL_R_ETIMEOUT;
+	for (i = 0; AUL_R_ETIMEOUT == r && i < RETRY_COUNT; i ++) {
+		r = aul_open_app(pkgname);
+		if (0 <= r) return r;
+		else {
+			_D("aul_open_app error(%d)", r);
+			_F("cannot open an app(%s) by %d", pkgname, r);
+		}
+		usleep(500000);
+	}
+
+	return r;
+}
+
+
+
+int menu_daemon_launch_app(const char *pkgname, bundle *b)
+{
+	register int i;
+	int r = AUL_R_ETIMEOUT;
+	for (i = 0; AUL_R_ETIMEOUT == r && i < RETRY_COUNT; i ++) {
+		r = aul_launch_app(pkgname, b);
+		if (0 <= r) return r;
+		else {
+			_D("aul_launch_app error(%d)", r);
+			_F("cannot launch an app(%s) by %d", pkgname, r);
+		}
+		usleep(500000);
+	}
+
+	return r;
+}
+
+
+
 bool menu_daemon_is_homescreen(pid_t pid)
 {
 	if (s_info.home_pid == pid) return true;
@@ -63,43 +104,72 @@ bool menu_daemon_is_homescreen(pid_t pid)
 
 
 
-static inline char *_get_selected_pkgname(void)
+inline char *menu_daemon_get_selected_pkgname(void)
 {
-	char *pkgname;
+	char *pkgname = NULL;
 
 	pkgname = vconf_get_str(VCONFKEY_SETAPPL_SELECTED_PACKAGE_NAME);
-	if (!pkgname) {
-		_E("Cannot get pkgname from vconf.");
-
-		pkgname = strdup(HOME_SCREEN_PKG_NAME);
-		if (!pkgname) {
-			_E("strdup error for pkgname, %s", strerror(errno));
-			return NULL;
-		}
-	}
+	retv_if(NULL == pkgname, NULL);
 
 	return pkgname;
 }
 
 
 
-static inline void _open_homescreen(const char *pkgname)
+static bool _exist_package(char *pkgid)
 {
-	int ret;
-	char *homescreen = (char *) pkgname;
+	int ret = 0;
+	pkgmgrinfo_pkginfo_h handle = NULL;
+
+	ret = pkgmgrinfo_pkginfo_get_pkginfo(pkgid, &handle);
+	if (PMINFO_R_OK != ret || NULL == handle) {
+		_D("%s doesn't exist in this binary", pkgid);
+		return false;
+	}
+
+	pkgmgrinfo_pkginfo_destroy_pkginfo(handle);
+
+	return true;
+}
+
+
+
+inline void menu_daemon_open_homescreen(const char *pkgname)
+{
+	char *homescreen = NULL;
+	char *tmp = NULL;
 
 	system("echo -e '[${_G}menu-daemon launches home-screen${C_}]' > /dev/kmsg");
-	ret = aul_open_app(homescreen);
+
+	if (NULL == pkgname) {
+		tmp = menu_daemon_get_selected_pkgname();
+		ret_if(NULL == tmp);
+		homescreen = tmp;
+	} else {
+		homescreen = (char *) pkgname;
+	}
+
+	syspopup_destroy_all();
+
+	int ret;
+	ret = menu_daemon_open_app(homescreen);
 	_D("can%s launch %s now. (%d)", ret < 0 ? "not" : "", homescreen, ret);
-	if (ret < 0 && strcmp(homescreen, HOME_SCREEN_PKG_NAME)) {
+	if (ret < 0 && strcmp(homescreen, HOME_SCREEN_PKG_NAME) && _exist_package(HOME_SCREEN_PKG_NAME)) {
 		_E("cannot launch package %s", homescreen);
 
-		if (-1 == ret) {
-			ret = aul_open_app(HOME_SCREEN_PKG_NAME);
-			if (ret < 0) {
-				_E("Failed to open a default home, %s(err:%d)", HOME_SCREEN_PKG_NAME, ret);
-			}
+		if (0 != vconf_set_str(VCONFKEY_SETAPPL_SELECTED_PACKAGE_NAME, HOME_SCREEN_PKG_NAME)) {
+			_E("Cannot set value(%s) into key(%s)", VCONFKEY_SETAPPL_SELECTED_PACKAGE_NAME, HOME_SCREEN_PKG_NAME);
 		}
+
+		while (AUL_R_ETIMEOUT == ret) {
+			_E("Failed to open a default home, %s", HOME_SCREEN_PKG_NAME);
+			ret = menu_daemon_open_app(HOME_SCREEN_PKG_NAME);
+		}
+	}
+
+	if (ret < 0) {
+		_E("Critical! Starter cannot launch anymore[%d]", ret);
+		_F("Critical! Starter cannot launch anymore[%d]", ret);
 	}
 
 	s_info.home_pid = ret;
@@ -107,9 +177,11 @@ static inline void _open_homescreen(const char *pkgname)
 		if (-1 == sysconf_set_mempolicy_bypid(ret, OOM_IGNORE)) {
 			_E("Cannot set the memory policy for Home-screen(%d)", ret);
 		} else {
-			_E("Set the memory policy for Home-screen(%d)", ret);
+			_D("Set the memory policy for Home-screen(%d)", ret);
 		}
 	}
+
+	if (tmp) free(tmp);
 }
 
 
@@ -117,20 +189,14 @@ static inline void _open_homescreen(const char *pkgname)
 static void _show_cb(keynode_t* node, void *data)
 {
 	int seq;
-	char *pkgname;
 
 	_D("[MENU_DAEMON] _show_cb is invoked");
-
-	pkgname = _get_selected_pkgname();
-	if (!pkgname)
-		return;
 
 	if (node) {
 		seq = vconf_keynode_get_int(node);
 	} else {
 		if (vconf_get_int(VCONFKEY_STARTER_SEQUENCE, &seq) < 0) {
 			_E("Failed to get sequence info");
-			free(pkgname);
 			return;
 		}
 	}
@@ -140,7 +206,6 @@ static void _show_cb(keynode_t* node, void *data)
 			if (s_info.home_pid > 0) {
 				int pid;
 				_D("pid[%d] is terminated.", s_info.home_pid);
-
 				pid = s_info.home_pid;
 				s_info.home_pid = -1;
 
@@ -149,16 +214,14 @@ static void _show_cb(keynode_t* node, void *data)
 			}
 			break;
 		case 1:
-			_open_homescreen(pkgname);
+			menu_daemon_open_homescreen(NULL);
 			break;
 		default:
 			_E("False sequence [%d]", seq);
 			break;
 	}
 
-	free(pkgname);
 	return;
-
 }
 
 
@@ -180,7 +243,7 @@ static void _pkg_changed(keynode_t* node, void *data)
 
 	_D("_pkg_changed is invoked");
 
-	pkgname = _get_selected_pkgname();
+	pkgname = menu_daemon_get_selected_pkgname();
 	if (!pkgname)
 		return;
 
@@ -197,15 +260,18 @@ static void _pkg_changed(keynode_t* node, void *data)
 			}
 		}
 
-		if (aul_terminate_pid(s_info.home_pid) != AUL_R_OK)
+		if (AUL_R_OK != aul_terminate_pid(s_info.home_pid))
 			_D("Failed to terminate pid %d", s_info.home_pid);
 	} else {
-		_open_homescreen(pkgname);
+		/* If there is no running home */
+		menu_daemon_open_homescreen(pkgname);
 	}
 
 	free(pkgname);
 	return;
 }
+
+
 
 static void _launch_volume(void)
 {
@@ -231,8 +297,6 @@ static void _launch_volume(void)
 
 int menu_daemon_check_dead_signal(int pid)
 {
-	char *pkgname;
-
 	if (s_info.power_off) {
 		_D("Power off. ignore dead cb\n");
 		return 0;
@@ -243,13 +307,14 @@ int menu_daemon_check_dead_signal(int pid)
 	if (pid < 0)
 		return 0;
 
-	pkgname = _get_selected_pkgname();
-	if (!pkgname)
-		return 0;
-
 	if (pid == s_info.home_pid) {
+		char *pkgname = NULL;
+		pkgname = menu_daemon_get_selected_pkgname();
+		retv_if(NULL == pkgname, 0);
+
 		_D("pkg_name : %s", pkgname);
-		_open_homescreen(pkgname);
+		menu_daemon_open_homescreen(pkgname);
+		free(pkgname);
 	} else if (pid == s_info.volume_pid) {
 		_launch_volume();
 	} else {
@@ -257,7 +322,6 @@ int menu_daemon_check_dead_signal(int pid)
 				pid, s_info.home_pid);
 	}
 
-	free(pkgname);
 
 	return 0;
 }
@@ -280,10 +344,10 @@ void menu_daemon_init(void *data)
 		_E("cannot remove sat-ui desktop.");
 
 	if (vconf_notify_key_changed(VCONFKEY_SETAPPL_SELECTED_PACKAGE_NAME, _pkg_changed, NULL) < 0)
-		_E("Failed to add callback for package change event");
+		_E("Failed to add the callback for package change event");
 
 	if (vconf_notify_key_changed(VCONFKEY_STARTER_SEQUENCE, _show_cb, NULL) < 0)
-		_E("Failed to add callback for show event");
+		_E("Failed to add the callback for show event");
 
 	_pkg_changed(NULL, NULL);
 	vconf_set_int(VCONFKEY_IDLE_SCREEN_LAUNCHED, VCONFKEY_IDLE_SCREEN_LAUNCHED_TRUE);
@@ -293,10 +357,17 @@ void menu_daemon_init(void *data)
 
 void menu_daemon_fini(void)
 {
-	vconf_ignore_key_changed(VCONFKEY_STARTER_SEQUENCE, _show_cb);
-	vconf_ignore_key_changed(VCONFKEY_SETAPPL_SELECTED_PACKAGE_NAME, _pkg_changed);
+	if (vconf_ignore_key_changed(VCONFKEY_SETAPPL_SELECTED_PACKAGE_NAME, _pkg_changed) < 0)
+		_E("Failed to ignore the callback for package change event");
+
+	if (vconf_ignore_key_changed(VCONFKEY_STARTER_SEQUENCE, _show_cb) < 0)
+		_E("Failed to ignore the callback for show event");
 
 	xmonitor_fini();
 	pkg_event_fini();
 	destroy_key_window();
 }
+
+
+
+// End of a file
