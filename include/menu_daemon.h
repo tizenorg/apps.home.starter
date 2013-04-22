@@ -16,12 +16,21 @@
 
 
 
+#include <bundle.h>
 #include <sys/types.h>
 #include <stdbool.h>
 
 extern void menu_daemon_init(void *data);
 extern void menu_daemon_fini(void);
 
+extern int menu_daemon_open_app(const char *pkgname);
+extern int menu_daemon_launch_app(const char *pkgname, bundle *b);
+
 extern bool menu_daemon_is_homescreen(pid_t pid);
 
 extern int menu_daemon_check_dead_signal(int pid);
+
+extern char *menu_daemon_get_selected_pkgname(void);
+extern void menu_daemon_open_homescreen(const char *pkgname);
+
+// End of a file

@@ -40,6 +40,7 @@ pkg_check_modules(pkgs REQUIRED
 	bundle
 	capi-appfw-application
 	capi-system-info
+	pkgmgr-info
 )
 
 FOREACH(flag ${pkgs_CFLAGS})

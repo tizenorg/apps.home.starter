@@ -19,6 +19,8 @@
 #ifndef __MENU_DAEMON_UTIL_H__
 #define __MENU_DAEMON_UTIL_H__
 #include <dlog.h>
+#include <stdio.h>
+#include <sys/time.h>
 
 #define HOME_SCREEN_PKG_NAME "org.tizen.menu-screen"
 #define CONF_PATH_NUMBER 1024
@@ -28,6 +30,7 @@
 #define LOG_TAG "starter"
 #endif
 
+/* Log */
 #if !defined(_W)
 #define _W(fmt, arg...) LOGW("[%s:%d] "fmt"\n", __func__, __LINE__, ##arg)
 #endif
@@ -75,4 +78,20 @@
 	} \
 }
 
-#endif
+#define PRINT_TIME(str) do { \
+	struct timeval tv; \
+	gettimeofday(&tv, NULL); \
+	_D("[%s:%d] %s TIME=%u.%u", __func__, __LINE__, str, (int)tv.tv_sec, (int)tv.tv_usec); \
+} while (0)
+
+#define _F(fmt, arg...) do {            \
+	FILE *fp;\
+	fp = fopen("/var/log/starter.log", "a+");\
+	if (NULL == fp) break;\
+    fprintf(fp, "[%s:%d] "fmt"\n", __func__, __LINE__, ##arg); \
+	fclose(fp);\
+} while (0)
+
+
+
+#endif /* __MENU_DAEMON_UTIL_H__ */
