@@ -88,6 +88,8 @@ SET(LOCK_SETTING lock-setting)
 
 ADD_SUBDIRECTORY(${CMAKE_SOURCE_DIR}/${LOCK_SETTING})
 
+INSTALL(FILES ${CMAKE_SOURCE_DIR}/${PKGNAME}.rule DESTINATION /etc/smack/accesses2.d)
+
 # install desktop file & icon
 #CONFIGURE_FILE(${PROJECT_NAME}.desktop.in ${PROJECT_NAME}.desktop)
 #INSTALL(FILES ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.desktop DESTINATION share/applications)
