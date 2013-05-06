@@ -108,4 +108,3 @@ ln -sf /etc/init.d/rd3starter /etc/rc.d/rc3.d/S43starter
 %{_libdir}/systemd/user/core-efl.target.wants/starter.path
 /usr/share/license/%{name}
 /opt/data/home-daemon
-/etc/smack/accesses2.d/starter.rule

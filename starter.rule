@@ -1,6 +1,0 @@
-starter system::homedir rwxat
-starter system::vconf rwxat
-starter system::media rwxat
-starter system::share rwxat
-starter pulseaudio rwxat
-dbus starter rx
