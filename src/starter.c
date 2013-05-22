@@ -25,6 +25,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <poll.h>
+#include <systemd/sd-daemon.h>
 
 #include <aul.h>
 #include <vconf.h>
@@ -261,6 +262,7 @@ int main(int argc, char *argv[])
 
 	_init(&ad);
 
+	sd_notify(0, "READY=1");
 	elm_run();
 
 	_fini(&ad);

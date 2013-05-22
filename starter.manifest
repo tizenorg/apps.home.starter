@@ -11,6 +11,9 @@
 		<filesystem path="/etc/init.d/rd4starter" label="_" exec_label="none" />
 		<filesystem path="/usr/lib/systemd/user/starter.path" label="_" exec_label="none" />
 		<filesystem path="/usr/lib/systemd/user/starter.service" label="_" exec_label="none" />
+		<filesystem path="/usr/lib/systemd/user/starter.socket" label="_" exec_label="none" />
 		<filesystem path="/usr/lib/systemd/user/core-efl.target.wants/starter.path" label="_" exec_label="none" />
+		<filesystem path="/usr/lib/systemd/user/core-efl.target.wants/starter.service" label="_" exec_label="none" />
+		<filesystem path="/usr/lib/systemd/user/sockets.target.wants/starter.socket" label="_" exec_label="none" />
 	</assign>
 </manifest>

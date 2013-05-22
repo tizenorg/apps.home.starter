@@ -5,8 +5,6 @@ Release:    3
 Group:      TO_BE/FILLED_IN
 License:    TO_BE/FILLED_IN
 Source0:    starter-%{version}.tar.gz
-Source1:    starter.service
-Source2:    starter.path
 Requires(post): /usr/bin/vconftool
 BuildRequires:  cmake
 BuildRequires:  pkgconfig(ail)
@@ -35,6 +33,8 @@ BuildRequires:  pkgconfig(xcomposite)
 BuildRequires:  pkgconfig(xext)
 BuildRequires:  pkgconfig(capi-system-info)
 BuildRequires:	pkgconfig(pkgmgr-info)
+BuildRequires:	pkgconfig(libsystemd-daemon)
+
 BuildRequires:  cmake
 BuildRequires:  edje-bin
 BuildRequires: gettext-tools
@@ -58,11 +58,11 @@ rm -rf %{buildroot}
 %make_install
 
 mkdir -p %{buildroot}%{_libdir}/systemd/user/core-efl.target.wants
-install -m 0644 %SOURCE1 %{buildroot}%{_libdir}/systemd/user/
-install -m 0644 %SOURCE2 %{buildroot}%{_libdir}/systemd/user/
+mkdir -p %{buildroot}%{_libdir}/systemd/user/sockets.target.wants
 ln -s ../starter.path %{buildroot}%{_libdir}/systemd/user/core-efl.target.wants/starter.path
+ln -s ../starter.service %{buildroot}%{_libdir}/systemd/user/core-efl.target.wants/starter.service
+ln -s ../starter.socket %{buildroot}%{_libdir}/systemd/user/sockets.target.wants/starter.socket
 mkdir -p %{buildroot}/usr/share/license
-cp -f LICENSE.Flora %{buildroot}/usr/share/license/%{name}
 mkdir -p %{buildroot}/opt/data/home-daemon
 
 %post
@@ -105,6 +105,9 @@ ln -sf /etc/init.d/rd3starter /etc/rc.d/rc3.d/S43starter
 /usr/ug/res/locale/*/LC_MESSAGES/*
 %{_libdir}/systemd/user/starter.path
 %{_libdir}/systemd/user/starter.service
+%{_libdir}/systemd/user/starter.socket
 %{_libdir}/systemd/user/core-efl.target.wants/starter.path
+%{_libdir}/systemd/user/core-efl.target.wants/starter.service
+%{_libdir}/systemd/user/sockets.target.wants/starter.socket
 /usr/share/license/%{name}
 /opt/data/home-daemon
