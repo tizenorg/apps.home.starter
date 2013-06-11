@@ -41,6 +41,7 @@ pkg_check_modules(pkgs REQUIRED
 	capi-appfw-application
 	capi-system-info
 	pkgmgr-info
+	libsystemd-daemon
 )
 
 FOREACH(flag ${pkgs_CFLAGS})
@@ -99,3 +100,8 @@ INSTALL(FILES ${CMAKE_SOURCE_DIR}/rd3starter DESTINATION /etc/init.d
 		PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
 		GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 #INSTALL to /etc/init.d
+
+INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/systemd/starter.service DESTINATION /usr/lib/systemd/user)
+INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/systemd/starter.socket DESTINATION /usr/lib/systemd/user)
+INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/systemd/starter.path DESTINATION /usr/lib/systemd/user)
+INSTALL(FILES ${CMAKE_SOURCE_DIR}/LICENSE.Flora DESTINATION /usr/share/license/starter)

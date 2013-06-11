@@ -20,7 +20,7 @@
 
 #include <vconf.h>
 #include <vconf-keys.h>
-
+#include <systemd/sd-daemon.h>
 #include <glib.h>
 #include <poll.h>
 #include <stdio.h>
@@ -293,49 +293,60 @@ static int lockd_create_sock(void)
 	struct sockaddr_un saddr;
 	int fd;
 
-	fd = socket(AF_UNIX, SOCK_STREAM, 0);
-	if (fd < 0) {
-		if (errno == EINVAL) {
-			fd = socket(AF_UNIX, SOCK_STREAM, 0);
-			if (fd < 0) {
-				LOCKD_DBG
-				    ("second chance - socket create error");
-				return -1;
-			}
-		} else {
-			LOCKD_DBG("socket error");
+	int n = sd_listen_fds(1);
+        if (n > 1) {
+                LOCKD_DBG("too many file descriptors received");
+                return -1;
+        } else if (n == 1) {
+                int r;
+                if ((r = sd_is_socket_unix(SD_LISTEN_FDS_START, SOCK_STREAM, 1, PHLOCK_SOCK_PREFIX, 0)) <= 0) {
+                        LOCKD_DBG("passed systemd file descriptor is of wrong type");
+                        return -1;
+                }
+                fd = SD_LISTEN_FDS_START + 0;
+        } else {
+		fd = socket(AF_UNIX, SOCK_STREAM, 0);
+		if (fd < 0) {
+			if (errno == EINVAL) {
+				fd = socket(AF_UNIX, SOCK_STREAM, 0);
+				if (fd < 0) {
+					LOCKD_DBG("second chance - socket create error");
+					return -1;
+				}
+				} else {
+					LOCKD_DBG("socket error");
+					return -1;
+				}
+		}
+
+		bzero(&saddr, sizeof(saddr));
+		saddr.sun_family = AF_UNIX;
+
+		strncpy(saddr.sun_path, PHLOCK_SOCK_PREFIX, strlen(PHLOCK_SOCK_PREFIX));
+		saddr.sun_path[strlen(PHLOCK_SOCK_PREFIX)] = 0;
+
+		unlink(saddr.sun_path);
+
+		if (bind(fd, (struct sockaddr *)&saddr, sizeof(saddr)) < 0) {
+			LOCKD_DBG("bind error");
+			close(fd);
+			return -1;
+		}
+
+		if (chmod(saddr.sun_path, (S_IRWXU | S_IRWXG | S_IRWXO)) < 0) {
+			LOCKD_DBG("failed to change the socket permission");
+			close(fd);
+			return -1;
+		}
+
+		lockd_set_sock_option(fd, 0);
+
+		if (listen(fd, 10) == -1) {
+			LOCKD_DBG("listen error");
+			close(fd);
 			return -1;
 		}
 	}
-
-	bzero(&saddr, sizeof(saddr));
-	saddr.sun_family = AF_UNIX;
-
-	strncpy(saddr.sun_path, PHLOCK_SOCK_PREFIX, strlen(PHLOCK_SOCK_PREFIX));
-	saddr.sun_path[strlen(PHLOCK_SOCK_PREFIX)] = 0;
-
-	unlink(saddr.sun_path);
-
-	if (bind(fd, (struct sockaddr *)&saddr, sizeof(saddr)) < 0) {
-		LOCKD_DBG("bind error");
-		close(fd);
-		return -1;
-	}
-
-	if (chmod(saddr.sun_path, (S_IRWXU | S_IRWXG | S_IRWXO)) < 0) {
-		LOCKD_DBG("failed to change the socket permission");
-		close(fd);
-		return -1;
-	}
-
-	lockd_set_sock_option(fd, 0);
-
-	if (listen(fd, 10) == -1) {
-		LOCKD_DBG("listen error");
-		close(fd);
-		return -1;
-	}
-
 	return fd;
 }
 
