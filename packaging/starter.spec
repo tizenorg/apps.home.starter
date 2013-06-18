@@ -111,3 +111,4 @@ ln -sf /etc/init.d/rd3starter /etc/rc.d/rc3.d/S43starter
 %{_libdir}/systemd/user/sockets.target.wants/starter.socket
 /usr/share/license/%{name}
 /opt/data/home-daemon
+/etc/smack/accesses.d/starter.rule
