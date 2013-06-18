@@ -1,5 +1,6 @@
 starter mobileprint x
 starter svi-data rx
+starter tts-server x
 starter system::homedir rx
 starter system::use_internet r
 starter isf rx
