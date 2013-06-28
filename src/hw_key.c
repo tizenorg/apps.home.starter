@@ -262,15 +262,16 @@ void _media_key_event_cb(media_key_e key, media_key_event_e status, void *user_d
 
 void create_key_window(void)
 {
-	key_info.win = ecore_x_window_input_new(0, 0, 0, 1, 1);
+	key_info.win = ecore_x_window_input_new(0, -10000, -10000, 1, 1);
 	if (!key_info.win) {
 		_D("Failed to create hidden window");
 		return;
 	}
-	ecore_x_event_mask_unset(key_info.win, ECORE_X_EVENT_MASK_NONE);
+	//ecore_x_event_mask_unset(key_info.win, ECORE_X_EVENT_MASK_NONE);
 	ecore_x_icccm_title_set(key_info.win, "menudaemon,key,receiver");
 	ecore_x_netwm_name_set(key_info.win, "menudaemon,key,receiver");
 	ecore_x_netwm_pid_set(key_info.win, getpid());
+	ecore_x_flush();
 
 	utilx_grab_key(ecore_x_display_get(), key_info.win, KEY_HOME, SHARED_GRAB);
 	utilx_grab_key(ecore_x_display_get(), key_info.win, KEY_VOLUMEDOWN, SHARED_GRAB);
