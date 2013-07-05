@@ -231,6 +231,8 @@ static Eina_Bool _key_press_cb(void *data, int type, void *event)
 			key_info.long_press = NULL;
 		}
 
+		syspopup_destroy_all();
+
 		key_info.long_press = ecore_timer_add(0.5, _launch_taskmgr_cb, NULL);
 		if (!key_info.long_press)
 			_E("Failed to add timer for long press detection");
