@@ -79,6 +79,7 @@ static Eina_Bool _launch_taskmgr_cb(void* data)
 
 	if ((val1 == VCONFKEY_PM_STATE_NORMAL) && (val2 == VCONFKEY_IDLE_UNLOCK)) {
 		_D("LCD ON, UNLOCK state => launch taskmgr");
+		syspopup_destroy_all();
 		if (menu_daemon_open_app(TASKMGR_PKG_NAME) < 0)
 			_E("Failed to launch the taskmgr");
 	} else {
@@ -102,6 +103,7 @@ static Eina_Bool _launch_by_home_key(void *data)
 
 inline static int _release_home_key(void)
 {
+	syspopup_destroy_all();
 	retv_if(NULL == key_info.long_press, EXIT_SUCCESS);
 	ecore_timer_del(key_info.long_press);
 	key_info.long_press = NULL;
@@ -112,8 +114,6 @@ inline static int _release_home_key(void)
 	}
 	ecore_timer_del(key_info.single_timer);
 	key_info.single_timer = NULL;
-
-	syspopup_destroy_all();
 
 	return EXIT_SUCCESS;
 }
