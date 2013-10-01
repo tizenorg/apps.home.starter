@@ -65,6 +65,8 @@ ln -s ../starter.socket %{buildroot}%{_libdir}/systemd/user/sockets.target.wants
 mkdir -p %{buildroot}/usr/share/license
 mkdir -p %{buildroot}/opt/data/home-daemon
 
+cp LICENSE.Flora %{buildroot}/usr/share/license/%{name}
+
 %post
 change_file_executable()
 {

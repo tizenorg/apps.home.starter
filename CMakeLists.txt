@@ -98,4 +98,4 @@ INSTALL(FILES ${CMAKE_SOURCE_DIR}/starter.rule DESTINATION /opt/etc/smack/access
 INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/systemd/starter.service DESTINATION /usr/lib/systemd/user)
 INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/systemd/starter.socket DESTINATION /usr/lib/systemd/user)
 INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/systemd/starter.path DESTINATION /usr/lib/systemd/user)
-INSTALL(FILES ${CMAKE_SOURCE_DIR}/LICENSE.Flora DESTINATION /usr/share/license/starter)
+#INSTALL(FILES ${CMAKE_SOURCE_DIR}/LICENSE.Flora DESTINATION /usr/share/license/starter)
