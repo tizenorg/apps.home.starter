@@ -1,0 +1,13 @@
+[Unit]
+Description=Start the "starter" program
+After=ac.service system-server.service launchpad-preload.service wm_ready.service
+
+[Service]
+Type=forking
+ExecStart=/etc/init.d/rd3starter
+Restart=on-failure
+RestartSec=0
+KillSignal=SIGKILL
+
+[Install]
+WantedBy=tizen-system.target

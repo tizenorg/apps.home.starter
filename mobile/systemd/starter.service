@@ -1,0 +1,12 @@
+[Unit]
+Description=Start the "starter" program
+Before=core-efl.target
+After=boot-animation.service
+
+[Service]
+ExecStart=/usr/bin/starter
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=core-efl.target

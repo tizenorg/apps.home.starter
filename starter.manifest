@@ -1,0 +1,27 @@
+<manifest>
+	<define>
+		<domain name="starter"/>
+	<request>
+		<smack request="sys-assert::core" type="rwxat"/>
+		<smack request="system::homedir" type="rwxat"/>
+		<smack request="system::vconf" type="rwxat"/>
+		<smack request="system::media" type="rwxat"/>
+		<smack request="system::share" type="rwxat"/>
+		<smack request="pulseaudio" type="rwxat"/>
+		<smack request="alarm-server::alarm" type="w"/>
+		<smack request="aul::terminate" type="x"/>
+		<smack request="aul::launch" type="x"/>
+	</request>
+	<provide>
+		<label name="starter::vconf"/>
+	</provide>
+	</define>
+	<request>
+		<domain name="starter"/>
+	</request>
+	<assign>
+		<filesystem path="/usr/bin/starter" label="starter" exec_label="starter" />
+		<filesystem path="/etc/init.d/rd3starter" label="_" exec_label="none" />
+		<filesystem path="/etc/init.d/rd4starter" label="_" exec_label="none" />
+	</assign>
+</manifest>
