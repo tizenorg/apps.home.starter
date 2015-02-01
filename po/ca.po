@@ -1,0 +1,6 @@
+msgid "IDS_TPLATFORM_BODY_SCREEN_READER_ENABLED_T_TTS"
+msgstr "Lector de pantalla habilitat."
+
+msgid "IDS_TPLATFORM_BODY_SCREEN_READER_DISABLED_T_TTS"
+msgstr "Lector de pantalla deshabilitat."
+

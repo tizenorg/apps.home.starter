@@ -1,9 +1,5 @@
 /*
- *  starter
- *
- * Copyright (c) 2000 - 2011 Samsung Electronics Co., Ltd. All rights reserved.
- *
- * Contact: Seungtaek Chung <seungtaek.chung@samsung.com>, Mi-Ju Lee <miju52.lee@samsung.com>, Xi Zhichan <zhichan.xi@samsung.com>
+ * Copyright (c) 2000 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +12,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
 #include <bundle.h>
@@ -38,12 +33,16 @@ extern const char *menu_daemon_get_svoice_pkg_name(void);
 extern int menu_daemon_check_dead_signal(int pid);
 
 extern char *menu_daemon_get_selected_pkgname(void);
-extern void menu_daemon_open_homescreen(const char *pkgname);
+extern int menu_daemon_open_homescreen(const char *pkgname);
 
+#if 0
 extern int menu_daemon_get_pm_key_ignore(int ignore_key);
 extern void menu_daemon_set_pm_key_ignore(int ignore_key, int value);
+#endif
 
 extern int menu_daemon_get_volume_pid(void);
+
+extern int menu_daemon_launch_search(void);
 
 
 // End of a file

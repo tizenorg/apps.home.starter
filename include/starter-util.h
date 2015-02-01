@@ -1,9 +1,5 @@
 /*
- *  starter
- *
- * Copyright (c) 2000 - 2011 Samsung Electronics Co., Ltd. All rights reserved.
- *
- * Contact: Seungtaek Chung <seungtaek.chung@samsung.com>, Mi-Ju Lee <miju52.lee@samsung.com>, Xi Zhichan <zhichan.xi@samsung.com>
+ * Copyright (c) 2000 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +12,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
 #ifndef __STARTER_UTIL_H__
@@ -25,6 +20,7 @@
 #include <stdio.h>
 #include <sys/time.h>
 
+#if 0
 #define WRITE_FILE_LOG(fmt, arg...) do {            \
 	FILE *fp;\
     struct timeval tv;				\
@@ -34,5 +30,5 @@
     fprintf(fp, "%u%09u : "fmt"\n", (int) tv.tv_sec, (int) tv.tv_usec, ##arg); \
 	fclose(fp);\
 } while (0)
-
+#endif
 #endif				/* __STARTER_UTIL_H__ */

@@ -1,9 +1,5 @@
 /*
- *  starter
- *
- * Copyright (c) 2000 - 2011 Samsung Electronics Co., Ltd. All rights reserved.
- *
- * Contact: Seungtaek Chung <seungtaek.chung@samsung.com>, Mi-Ju Lee <miju52.lee@samsung.com>, Xi Zhichan <zhichan.xi@samsung.com>
+ * Copyright (c) 2000 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +12,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
 #include <Elementary.h>
@@ -147,25 +142,28 @@ _lockd_window_check_validate_rect(Ecore_X_Display * dpy, Ecore_X_Window window)
 	unsigned int height = 0;
 	unsigned int border = 0;
 	unsigned int depth = 0;
+	unsigned int root_w = 0;
+	unsigned int root_h = 0;
 
 	Eina_Bool ret = FALSE;
 
 	root = ecore_x_window_root_first_get();
-
+	XGetGeometry(dpy, root, &root, &rel_x, &rel_y, &root_w, &root_h, &border, &depth);
+	LOCKD_DBG("root rel_x[%d] rel_y[%d] border[%d] width[%d] height[%d]", rel_x, rel_y, border, root_w, root_h);
 	if (XGetGeometry
 	    (dpy, window, &root, &rel_x, &rel_y, &width, &height, &border,
 	     &depth)) {
 		if (XTranslateCoordinates
 		    (dpy, window, root, 0, 0, &abs_x, &abs_y, &child)) {
-			if ((abs_x - border) >= 480 || (abs_y - border) >= 800
+		    LOCKD_DBG("abs_x[%d] abs_y[%d] border[%d] width[%d] height[%d]", abs_x, abs_y, border, width, height);
+			if ((abs_x - border) >= root_w || (abs_y - border) >= root_h
 			    || (width + abs_x) <= 0 || (height + abs_y) <= 0) {
 				ret = FALSE;
 			} else {
-				ret = TRUE;
+				ret = (width == root_w) && (height == root_h);
 			}
 		}
 	}
-
 	return ret;
 }
 
@@ -238,7 +236,7 @@ static void _lockd_phone_lock_alpha_ug_layout_cb(ui_gadget_h ug,
 }
 
 static void _lockd_phone_lock_alpha_ug_result_cb(ui_gadget_h ug,
-						 service_h service, void *priv)
+						 app_control_h app_control, void *priv)
 {
 	int alpha;
 	const char *val1 = NULL, *val2 = NULL;
@@ -248,19 +246,22 @@ static void _lockd_phone_lock_alpha_ug_result_cb(ui_gadget_h ug,
 	if (!ug || !lockw)
 		return;
 
-	service_get_extra_data(service, "name", &val1);
-
-	LOCKD_DBG("val1 = %s", val1);
+	app_control_get_extra_data(app_control, "name", &val1);
 
 	if (val1 == NULL)
 		return;
 
-	service_get_extra_data(service, "result", &val2);
+	LOCKD_DBG("val1 = %s", val1);
 
-		if (val2 == NULL)
-			return;
+	app_control_get_extra_data(app_control, "result", &val2);
 
-		LOCKD_DBG("val2 = %s", val2);
+	if (val2 == NULL){
+		if(val1 != NULL)
+			free(val1);
+		return;
+	}
+
+	LOCKD_DBG("val2 = %s", val2);
 
 
 	if (!strcmp(val1, "phonelock-ug")) {
@@ -576,8 +577,17 @@ lockd_window_set_window_effect(lockw_data * data, int lock_app_pid, void *event)
 			    ("This is lock application. Disable window effect. win id : %x\n",
 			     user_window);
 
-			utilx_set_window_effect_state(ecore_x_display_get(),
-						      user_window, 0);
+			/*utilx_set_window_effect_state(ecore_x_display_get(),
+						      user_window, 0);*/
+
+			Ecore_X_Atom ATOM_WINDOW_EFFECT_ENABLE = 0;
+			unsigned int effect_state = 0;
+			ATOM_WINDOW_EFFECT_ENABLE = ecore_x_atom_get("_NET_CM_WINDOW_EFFECT_ENABLE");
+			if (ATOM_WINDOW_EFFECT_ENABLE) {
+				ecore_x_window_prop_card32_set(user_window, ATOM_WINDOW_EFFECT_ENABLE, &effect_state, 1);
+			} else {
+				LOCKD_ERR("ecore_x_atom_get() failed");
+			}
 			return EINA_TRUE;
 		}
 	}
@@ -633,10 +643,18 @@ lockd_window_mgr_ready_lock(void *data, lockw_data * lockw,
 			    Eina_Bool(*create_cb) (void *, int, void *),
 			    Eina_Bool(*show_cb) (void *, int, void *))
 {
+	Ecore_X_Window root_window;
+	LOCKD_DBG("%s, %d", __func__, __LINE__);
+
 	if (lockw == NULL) {
 		LOCKD_ERR("lockw is NULL.");
 		return;
 	}
+
+	/* For getting window x event */
+	root_window = ecore_x_window_root_first_get();
+	ecore_x_window_client_sniff(root_window);
+
 	/* Register window create CB */
 	lockw->h_wincreate =
 	    ecore_event_handler_add(ECORE_X_EVENT_WINDOW_CREATE, create_cb,
@@ -656,12 +674,18 @@ lockd_window_mgr_ready_lock(void *data, lockw_data * lockw,
 
 void lockd_window_mgr_finish_lock(lockw_data * lockw)
 {
-	Ecore_X_Window xwin;
+	Ecore_X_Window root_window;
+	LOCKD_DBG("%s, %d", __func__, __LINE__);
 
 	if (lockw == NULL) {
 		LOCKD_ERR("lockw is NULL.");
 		return;
 	}
+
+	/* delete getting window x event */
+	root_window = ecore_x_window_root_first_get();
+	ecore_x_window_client_sniff(root_window);
+
 	/* delete window create event handler */
 	if (lockw->h_wincreate != NULL) {
 		ecore_event_handler_del(lockw->h_wincreate);
@@ -742,7 +766,7 @@ void lockd_destroy_ug_window(void *data)
 void lockd_show_phonelock_alpha_ug(void *data)
 {
 	lockw_data *lockw = NULL;
-	service_h service;
+	app_control_h app_control;
 	struct ug_cbs cbs = { 0, };
 	LOCKD_DBG("%s, %d", __func__, __LINE__);
 
@@ -756,10 +780,10 @@ void lockd_show_phonelock_alpha_ug(void *data)
 	cbs.destroy_cb = _lockd_phone_lock_alpha_ug_destroy_cb;
 	cbs.priv = (void *)data;
 
-	service_create(&service);
+	app_control_create(&app_control);
 
-	service_add_extra_data(service, "phone-lock-type", "phone-lock");
-	service_add_extra_data(service, "window-type", "alpha");
+	app_control_add_extra_data(app_control, "phone-lock-type", "phone-lock");
+	app_control_add_extra_data(app_control, "window-type", "alpha");
 
 	elm_win_alpha_set(lockw->main_win, TRUE);
 	evas_object_color_set(lockw->main_win, 0, 0, 0, 0);
@@ -769,10 +793,10 @@ void lockd_show_phonelock_alpha_ug(void *data)
 				     "LOCK_SCREEN", "LOCK_SCREEN");
 
 	UG_INIT_EFL(lockw->main_win, UG_OPT_INDICATOR_ENABLE);
-	ug_create(NULL, "phone-lock-efl", UG_MODE_FULLVIEW, service, &cbs);
+	ug_create(NULL, "phone-lock-efl", UG_MODE_FULLVIEW, app_control, &cbs);
 	LOCKD_DBG("%s, %d", __func__, __LINE__);
 
-	service_destroy(service);
+	app_control_destroy(app_control);
 
 	LOCKD_DBG("%s, %d", __func__, __LINE__);
 

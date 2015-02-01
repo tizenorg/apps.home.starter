@@ -1,9 +1,5 @@
 /*
- *  starter
- *
- * Copyright (c) 2000 - 2011 Samsung Electronics Co., Ltd. All rights reserved.
- *
- * Contact: Seungtaek Chung <seungtaek.chung@samsung.com>, Mi-Ju Lee <miju52.lee@samsung.com>, Xi Zhichan <zhichan.xi@samsung.com>
+ * Copyright (c) 2000 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,27 +12,33 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
 #include <vconf.h>
 #include <vconf-keys.h>
-
 #include <aul.h>
 #include <pkgmgr-info.h>
+#include <sys/time.h>
+#include <sys/resource.h>
+#include <sys/types.h>
+#include <Ecore.h>
+#include <unistd.h>
 
 #include "lockd-debug.h"
 #include "lockd-process-mgr.h"
 #include "starter-vconf.h"
 
 #define LOCKD_DEFAULT_PKG_NAME "org.tizen.lockscreen"
-#define LOCKD_DRAG_LOCKSCREEN "org.tizen.draglock"
+#define LOCKD_DRAG_LOCKSCREEN "com.samsung.draglock"
 #define LOCKD_PHONE_LOCK_PKG_NAME LOCKD_DEFAULT_PKG_NAME
 #define RETRY_MAXCOUNT 30
 #define RELAUNCH_INTERVAL 100*1000
 
-#define LOCKD_VOICE_CALL_PKG_NAME "org.tizen.call"
-#define LOCKD_VIDEO_CALL_PKG_NAME "org.tizen.vtmain"
+#define LOCKD_VOICE_CALL_PKG_NAME "com.samsung.call"
+#define LOCKD_VIDEO_CALL_PKG_NAME "com.samsung.vtmain"
+
+#define NICE_VALUE_PWLOCK -5
+#define NICE_VALUE_LOCKSCREEN -20
 
 static char *default_lockscreen_pkg = NULL;
 
@@ -155,7 +157,7 @@ lockd_process_mgr_start_lock(void *data, int (*dead_cb) (int, void *),
 			return pid;
 		}
 	}
-	LOCKD_DBG("Relaunch lock application failed..!!");
+	LOCKD_ERR("Relaunch lock application failed..!!");
 	return pid;
 }
 
@@ -175,41 +177,94 @@ int lockd_process_mgr_start_normal_lock(void *data, int (*dead_cb) (int, void *)
 			usleep(RELAUNCH_INTERVAL);
 		} else if (pid == AUL_R_ERROR) {
 			LOCKD_SECURE_DBG("launch[%s] is failed, launch default lock screen", default_lockscreen_pkg);
-#if 0
-			pid = aul_launch_app(LOCKD_DRAG_LOCKSCREEN, NULL);
-			if (pid >0) {
-				if (vconf_set_str(VCONFKEY_SETAPPL_3RD_LOCK_PKG_NAME_STR, LOCKD_DRAG_LOCKSCREEN) != 0) {
-					LOCKD_SECURE_ERR("vconf key [%s] set [%s] is failed", VCONFKEY_SETAPPL_3RD_LOCK_PKG_NAME_STR, LOCKD_DRAG_LOCKSCREEN);
-				}
-				return pid;
-			}
-#endif
 		} else {
 			return pid;
 		}
 	}
-	LOCKD_DBG("Relaunch lock application failed..!!");
+	LOCKD_ERR("Relaunch lock application failed..!!");
 	return pid;
+}
+
+static Eina_Bool _set_priority_lockscreen_process_cb(void *data)
+{
+	int prio;
+
+	prio = getpriority(PRIO_PROCESS, (pid_t)data);
+	if (prio == NICE_VALUE_LOCKSCREEN) {
+		LOCKD_DBG("%s (%d: %d)\n", "setpriority Success", (pid_t)data, prio);
+		return ECORE_CALLBACK_CANCEL;
+	}
+
+	if (setpriority(PRIO_PROCESS, (pid_t)data, NICE_VALUE_LOCKSCREEN) < 0 ) {
+		LOCKD_DBG("%s\n", strerror(errno));
+		return ECORE_CALLBACK_CANCEL;
+	}
+
+	return ECORE_CALLBACK_RENEW;
+}
+
+static Eina_Bool _set_priority_pwlock_process_cb(void *data)
+{
+	int prio;
+
+	prio = getpriority(PRIO_PROCESS, (pid_t)data);
+	if (prio == NICE_VALUE_PWLOCK) {
+		LOCKD_DBG("%s (%d: %d)\n", "setpriority Success", (pid_t)data, prio);
+		return ECORE_CALLBACK_CANCEL;
+	}
+
+	if (setpriority(PRIO_PROCESS, (pid_t)data, NICE_VALUE_PWLOCK) < 0 ) {
+		LOCKD_DBG("%s\n", strerror(errno));
+		return ECORE_CALLBACK_CANCEL;
+	}
+
+	return ECORE_CALLBACK_RENEW;
 }
 
 int lockd_process_mgr_start_phone_lock(void)
 {
 	int pid = 0;
 	bundle *b = NULL;
+	int i;
 
 	LOCKD_DBG("%s, %d", __func__, __LINE__);
 	b = bundle_create();
 
 	bundle_add(b, "lock_type", "phone_lock");
 
-	pid = aul_launch_app(LOCKD_PHONE_LOCK_PKG_NAME, b);
-	LOCKD_SECURE_DBG("aul_launch_app(%s, b), pid = %d", LOCKD_PHONE_LOCK_PKG_NAME,
-		  pid);
+	for (i=0; i<RETRY_MAXCOUNT; i++)
+	{
+		pid = aul_launch_app(LOCKD_PHONE_LOCK_PKG_NAME, b);
+
+		LOCKD_SECURE_DBG("aul_launch_app(%s), pid = %d", LOCKD_PHONE_LOCK_PKG_NAME, pid);
+
+		if ((pid == AUL_R_ECOMM) || (pid == AUL_R_ETERMINATING)) {
+			LOCKD_DBG("Relaunch lock application [%d]times", i);
+			usleep(RELAUNCH_INTERVAL);
+		} else {
+			if (b)
+				bundle_free(b);
+
+			return pid;
+		}
+	}
+
 	if (b)
 		bundle_free(b);
 
 	return pid;
 }
+
+int lockd_process_mgr_set_lockscreen_priority(int pid)
+{
+	return !ecore_timer_add(1.0f, _set_priority_lockscreen_process_cb, (void *)pid);
+}
+
+int lockd_process_mgr_set_pwlock_priority(int pid)
+{
+	return !ecore_timer_add(1.0f, _set_priority_pwlock_process_cb, (void *)pid);
+}
+
 
 int lockd_process_mgr_start_recovery_lock(void)
 {
@@ -239,6 +294,25 @@ int lockd_process_mgr_start_back_to_app_lock(void)
 	b = bundle_create();
 
 	bundle_add(b, "lock_type", "back_to_call");
+
+	pid = aul_launch_app(LOCKD_PHONE_LOCK_PKG_NAME, b);
+	LOCKD_SECURE_DBG("aul_launch_app(%s, b), pid = %d", LOCKD_PHONE_LOCK_PKG_NAME,
+		  pid);
+	if (b)
+		bundle_free(b);
+
+	return pid;
+}
+
+int lockd_process_mgr_start_ready_lock(void)
+{
+	int pid = 0;
+	bundle *b = NULL;
+
+	LOCKD_DBG("%s, %d", __func__, __LINE__);
+	b = bundle_create();
+
+	bundle_add(b, "lock_op", "start_ready");
 
 	pid = aul_launch_app(LOCKD_PHONE_LOCK_PKG_NAME, b);
 	LOCKD_SECURE_DBG("aul_launch_app(%s, b), pid = %d", LOCKD_PHONE_LOCK_PKG_NAME,
@@ -300,13 +374,37 @@ int lockd_process_mgr_check_call(int pid)
 {
 	char buf[128];
 	LOCKD_DBG("%s, %d", __func__, __LINE__);
+
 	/* Check pid is invalid. */
 	if (aul_app_get_pkgname_bypid(pid, buf, sizeof(buf)) < 0) {
-		LOCKD_DBG("no such pkg by pid %d\n", pid);
+		LOCKD_DBG("no such pkg by pid %d", pid);
 	} else {
-		LOCKD_SECURE_DBG("app pkgname = %s, pid = %d\n", buf, pid);
+		LOCKD_SECURE_DBG("app pkgname = %s, pid = %d", buf, pid);
 		if ((!strncmp(buf, LOCKD_VOICE_CALL_PKG_NAME, strlen(buf)))
 		    || (!strncmp(buf, LOCKD_VIDEO_CALL_PKG_NAME, strlen(buf)))) {
+		    return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+int lockd_process_mgr_check_home(int pid)
+{
+	char buf[128];
+	char *pkgname = NULL;
+
+	LOCKD_DBG("%s, %d", __func__, __LINE__);
+	/* Check pid is invalid. */
+	if (aul_app_get_pkgname_bypid(pid, buf, sizeof(buf)) < 0) {
+		LOCKD_DBG("no such pkg by pid %d", pid);
+	} else {
+		LOCKD_SECURE_DBG("app pkgname = %s, pid = %d", buf, pid);
+
+		pkgname = vconf_get_str(VCONFKEY_SETAPPL_SELECTED_PACKAGE_NAME);
+
+		if ((pkgname != NULL) &&
+			(!strncmp(buf, pkgname, strlen(buf)))) {
+			LOCKD_SECURE_DBG("home pkgname = %s", pkgname);
 		    return TRUE;
 		}
 	}

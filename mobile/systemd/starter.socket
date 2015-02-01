@@ -1,6 +1,0 @@
-[Socket]
-ListenStream=/tmp/phlock
-SocketMode=0777
-
-[Install]
-WantedBy=sockets.target
