@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-#ifndef __STARTER_VCONF_H__
-#define __STARTER_VCONF_H__
+#ifndef __CLOCK_MGR_H__
+#define __CLOCK_MGR_H__
 
-#define VCONF_PRIVATE_LOCKSCREEN_PKGNAME "file/private/lockscreen/pkgname"
-#define VCONF_PRIVATE_LOCKSCREEN_DEFAULT_PKGNAME "file/private/lockscreen/default_pkgname"
+void init_clock_mgr(void *data);
+void fini_clock_mgr(void *data);
+void clock_mgr_set_reserved_apps_status(void *data);
 
-#endif				/* __STARTER_VCONF_H__ */
+#endif
+/* __CLOCK_MGR_H__*/
+

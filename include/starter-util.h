@@ -14,10 +14,21 @@
  * limitations under the License.
  */
 
-#ifndef __STARTER_VCONF_H__
-#define __STARTER_VCONF_H__
+#ifndef __STARTER_UTIL_H__
+#define __STARTER_UTIL_H__
 
-#define VCONF_PRIVATE_LOCKSCREEN_PKGNAME "file/private/lockscreen/pkgname"
-#define VCONF_PRIVATE_LOCKSCREEN_DEFAULT_PKGNAME "file/private/lockscreen/default_pkgname"
+#include <stdio.h>
+#include <sys/time.h>
 
-#endif				/* __STARTER_VCONF_H__ */
+#if 0
+#define WRITE_FILE_LOG(fmt, arg...) do {            \
+	FILE *fp;\
+    struct timeval tv;				\
+    gettimeofday(&tv, NULL);		\
+	fp = fopen("/var/log/boottime", "a+");\
+	if (NULL == fp) break;\
+    fprintf(fp, "%u%09u : "fmt"\n", (int) tv.tv_sec, (int) tv.tv_usec, ##arg); \
+	fclose(fp);\
+} while (0)
+#endif
+#endif				/* __STARTER_UTIL_H__ */

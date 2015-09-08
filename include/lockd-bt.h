@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
-#ifndef __STARTER_VCONF_H__
-#define __STARTER_VCONF_H__
+#ifndef __LOCKD_BT_H__
+#define __LOCKD_BT_H__
 
-#define VCONF_PRIVATE_LOCKSCREEN_PKGNAME "file/private/lockscreen/pkgname"
-#define VCONF_PRIVATE_LOCKSCREEN_DEFAULT_PKGNAME "file/private/lockscreen/default_pkgname"
+int lockd_start_bt_monitor(void);
 
-#endif				/* __STARTER_VCONF_H__ */
+void lockd_stop_bt_monitor(void);
+
+void lockd_change_security_auto_lock(int is_connected);
+
+int lockd_get_auto_lock_security(void);
+
+#endif				/* __LOCKD_BT_H__ */

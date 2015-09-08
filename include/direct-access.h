@@ -14,10 +14,20 @@
  * limitations under the License.
  */
 
-#ifndef __STARTER_VCONF_H__
-#define __STARTER_VCONF_H__
+#ifndef __DIRECT_ACCESS_H__
+#define __DIRECT_ACCESS_H__
 
-#define VCONF_PRIVATE_LOCKSCREEN_PKGNAME "file/private/lockscreen/pkgname"
-#define VCONF_PRIVATE_LOCKSCREEN_DEFAULT_PKGNAME "file/private/lockscreen/default_pkgname"
+#include <E_DBus.h>
 
-#endif				/* __STARTER_VCONF_H__ */
+DBusMessage *invoke_dbus_method_sync(const char *dest, const char *path,
+		const char *interface, const char *method,
+		const char *sig, char *param[]);
+
+DBusMessage *invoke_dbus_method(const char *dest, const char *path,
+		const char *interface, const char *method,
+		const char *sig, char *param[]);
+
+int launch_direct_access(int access_val);
+
+#endif //__DIRECT_ACCESS_H__
+

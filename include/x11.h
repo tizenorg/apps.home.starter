@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-#ifndef __STARTER_VCONF_H__
-#define __STARTER_VCONF_H__
+#ifndef __STARTER_X11_H__
+#define __STARTER_X11_H__
 
-#define VCONF_PRIVATE_LOCKSCREEN_PKGNAME "file/private/lockscreen/pkgname"
-#define VCONF_PRIVATE_LOCKSCREEN_DEFAULT_PKGNAME "file/private/lockscreen/default_pkgname"
+void prop_string_set(const char *name, const char *value);
+void prop_int_set(const char *name, unsigned int val);
+void set_window_scale(void);
 
-#endif				/* __STARTER_VCONF_H__ */
+#endif				/* __STARTER_X11_H__ */

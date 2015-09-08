@@ -14,10 +14,20 @@
  * limitations under the License.
  */
 
-#ifndef __STARTER_VCONF_H__
-#define __STARTER_VCONF_H__
+#ifndef __DBUS_UTIL_H__
+#define __DBUS_UTIL_H__
 
-#define VCONF_PRIVATE_LOCKSCREEN_PKGNAME "file/private/lockscreen/pkgname"
-#define VCONF_PRIVATE_LOCKSCREEN_DEFAULT_PKGNAME "file/private/lockscreen/default_pkgname"
+#include <E_DBus.h>
 
-#endif				/* __STARTER_VCONF_H__ */
+#define OOM_ADJ_VALUE_HOMESCREEN 0
+
+#ifdef FEATURE_LITE
+#define OOM_ADJ_VALUE_DEFAULT   200
+#else
+#define OOM_ADJ_VALUE_DEFAULT   0
+#endif
+
+void starter_dbus_home_raise_signal_send(void);
+int starter_dbus_set_oomadj(int pid, int oom_adj_value);
+
+#endif //__DBUS_UTIL_H__

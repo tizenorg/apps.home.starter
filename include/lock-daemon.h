@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-#ifndef __STARTER_VCONF_H__
-#define __STARTER_VCONF_H__
+#ifndef __LOCK_DAEMON_H__
+#define __LOCK_DAEMON_H__
 
-#define VCONF_PRIVATE_LOCKSCREEN_PKGNAME "file/private/lockscreen/pkgname"
-#define VCONF_PRIVATE_LOCKSCREEN_DEFAULT_PKGNAME "file/private/lockscreen/default_pkgname"
+int start_lock_daemon(int launch_lock, int is_first_boot);
+int lockd_get_lock_type(void);
+int lockd_get_hall_status(void);
+int lockd_get_lock_state(void);
 
-#endif				/* __STARTER_VCONF_H__ */
+#endif				/* __LOCK_DAEMON_H__ */

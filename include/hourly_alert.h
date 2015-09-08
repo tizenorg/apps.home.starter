@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-#ifndef __STARTER_VCONF_H__
-#define __STARTER_VCONF_H__
+#ifndef __HOURLY_ALERT_H__
+#define __HOURLY_ALERT_H__
 
-#define VCONF_PRIVATE_LOCKSCREEN_PKGNAME "file/private/lockscreen/pkgname"
-#define VCONF_PRIVATE_LOCKSCREEN_DEFAULT_PKGNAME "file/private/lockscreen/default_pkgname"
 
-#endif				/* __STARTER_VCONF_H__ */
+void init_hourly_alert(void *data);
+void fini_hourly_alert(void *data);
+
+#endif				/* __HOURLY_ALERT_H__ */

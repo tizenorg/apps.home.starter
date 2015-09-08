@@ -14,10 +14,21 @@
  * limitations under the License.
  */
 
-#ifndef __STARTER_VCONF_H__
-#define __STARTER_VCONF_H__
+#ifndef __DBUS_H__
+#define __DBUS_H__
 
-#define VCONF_PRIVATE_LOCKSCREEN_PKGNAME "file/private/lockscreen/pkgname"
-#define VCONF_PRIVATE_LOCKSCREEN_DEFAULT_PKGNAME "file/private/lockscreen/default_pkgname"
+#include <E_DBus.h>
 
-#endif				/* __STARTER_VCONF_H__ */
+int request_Poweroff(void);
+int request_dbus_cpu_booster(void);
+int init_dbus_ALPM_signal(void *data);
+int init_dbus_COOL_DOWN_MODE_signal(void *data);
+int get_dbus_cool_down_mode(void *data);
+int init_dbus_NIKE_RUNNING_STATUS_signal(void *data);
+int init_dbus_ALPM_clock_state_signal(void *data);
+void starter_dbus_alpm_clock_signal_send(void *data);
+DBusConnection *starter_dbus_connection_get(void);
+
+
+#endif //__DBUS_H__
+

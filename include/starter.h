@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-#ifndef __STARTER_VCONF_H__
-#define __STARTER_VCONF_H__
+#ifndef __STARTER_H__
+#define __STARTER_H__
 
-#define VCONF_PRIVATE_LOCKSCREEN_PKGNAME "file/private/lockscreen/pkgname"
-#define VCONF_PRIVATE_LOCKSCREEN_DEFAULT_PKGNAME "file/private/lockscreen/default_pkgname"
+#include <sys/time.h>
 
-#endif				/* __STARTER_VCONF_H__ */
+struct appdata {
+	struct timeval tv_start;	/* start time */
+};
+
+#endif				/* __STARTER_H__ */

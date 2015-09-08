@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-#ifndef __STARTER_VCONF_H__
-#define __STARTER_VCONF_H__
+extern void destroy_key_window(void);
+extern void create_key_window(char *home_pkgname, void *data);
 
-#define VCONF_PRIVATE_LOCKSCREEN_PKGNAME "file/private/lockscreen/pkgname"
-#define VCONF_PRIVATE_LOCKSCREEN_DEFAULT_PKGNAME "file/private/lockscreen/default_pkgname"
-
-#endif				/* __STARTER_VCONF_H__ */
+// End of a file
