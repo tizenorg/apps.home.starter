@@ -19,18 +19,26 @@
 #include <dlog.h>
 #include <stdio.h>
 #include <sys/time.h>
+#include <app.h>
 
-#define APP_TRAY_PKG_NAME "com.samsung.app-tray"
+#define APP_TRAY_PKG_NAME "org.tizen.app-tray"
 #define MENU_SCREEN_PKG_NAME "org.tizen.menu-screen"
-#define PROVIDER_PKG_NAME "com.samsung.data-provider-master"
-#define SVOICE_PKG_NAME "com.samsung.svoice"
-#define CLUSTER_HOME_PKG_NAME "com.samsung.cluster-home"
-#define EASY_HOME_PKG_NAME "com.samsung.easy-home"
-#define EASY_APPS_PKG_NAME "com.samsung.easy-apps"
+#define PROVIDER_PKG_NAME "org.tizen.data-provider-master"
+#define CLUSTER_HOME_PKG_NAME "org.tizen.cluster-home"
+#define EASY_HOME_PKG_NAME "org.tizen.easy-home"
+#define EASY_APPS_PKG_NAME "org.tizen.easy-apps"
 #define HOMESCREEN_PKG_NAME "org.tizen.homescreen"
 #define TASKMGR_PKG_NAME "org.tizen.task-mgr"
-#define DEFAULT_TASKMGR_PKG_NAME "com.samsung.taskmgr"
+#define DEFAULT_TASKMGR_PKG_NAME "org.tizen.taskmgr"
 #define CONF_PATH_NUMBER 1024
+
+#define BUF_SIZE_16 16
+#define BUF_SIZE_32 32
+#define BUF_SIZE_128 128
+#define BUF_SIZE_256 256
+#define BUF_SIZE_512 512
+#define BUF_SIZE_1024 1024
+
 
 #ifdef  LOG_TAG
 #undef  LOG_TAG
@@ -111,6 +119,13 @@
 	fclose(fp);\
 } while (0)
 
+#if !defined(_)
+#define _(str) dgettext(PACKAGE, str)
+#endif
+
+#if !defined(S_)
+#define S_(str) dgettext("sys_string", str)
+#endif
 
 
 #endif /* __MENU_DAEMON_UTIL_H__ */

@@ -1,0 +1,329 @@
+/*
+ * Copyright (c) 2009-2014 Samsung Electronics Co., Ltd All Rights Reserved
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+	styles {
+		style {
+			name: "btn_text_style";
+			base: "font=Tizen:style=Regular color=#FFFFFF font_size=32 wrap=none align=center";
+		}
+	}
+
+	group {
+		name: "lock-control-panel";
+		images {
+			image: "event_close_bg.#.png" COMP;
+		}
+		parts {
+			part {
+				name: "bg";
+				type: SPACER;
+				description {
+					state: "default" 0.0;
+				}
+			}
+			part {
+				name: "padding.top";
+				type: SPACER;
+				description {
+					state: "default" 0.0;
+					rel1 { relative: 0.0 0.0; to: "bg"; }
+					rel2 { relative: 1.0 0.0; to: "bg"; }
+				}
+			}
+			part {
+				name: "padding.left";
+				type: SPACER;
+				description {
+					state: "default" 0.0;
+					rel1 { relative: 0.0 0.0; to: "bg"; }
+					rel2 { relative: 38/WIN_WIDTH 1.0; to: "bg"; }
+				}
+			}
+			part {
+				name: "padding.right";
+				type: SPACER;
+				description {
+					state: "default" 0.0;
+					rel1 { relative: (WIN_WIDTH-50)/WIN_WIDTH 0.0; to: "bg"; }
+					rel2 { relative: 1.0 1.0; to: "bg"; }
+				}
+			}
+			part {
+				name: "padding.bottom";
+				type: SPACER;
+				description {
+					state: "default" 0.0;
+					rel1 { relative: 0.0 (CONTROL_AREA_HEIGHT-42)/CONTROL_AREA_HEIGHT; to: "bg"; }
+					rel2 { relative: 1.0 1.0; to: "bg"; }
+				}
+			}
+
+			/* Return to Call*/
+			part {
+				name: "sw.btn.return_to_call";
+				type: SWALLOW;
+				scale: 1;
+				description {
+					state: "default" 0.0;
+					align: 0.0 1.0;
+					min: 1 46;
+					rel1 { relative: 1.0 0.0; to_x: "padding.left"; to_y: "padding.btn"; }
+					rel2 { relative: 0.0 0.0; to_x: "btn.cancel"; to_y: "padding.btn"; }
+				}
+			}
+
+			part {
+				name: "padding.btn";
+				type: SPACER;
+				scale: 1;
+				description {
+					state: "default" 0.0;
+					align: 0.0 1.0;
+					min: WIN_WIDTH 16;
+					max: WIN_WIDTH 16;
+					rel1 { relative: 0.0 0.0; to_x: "bg"; to_y: "sw.btn.plmn"; }
+					rel2 { relative: 1.0 0.0; to_x: "bg"; to_y: "sw.btn.plmn"; }
+				}
+			}
+
+			/* PLMN-SPN */
+			part {
+				name: "sw.btn.plmn";
+				type: SWALLOW;
+				scale: 1;
+				description {
+					state: "default" 0.0;
+					align: 0.0 1.0;
+					min: 1 46;
+					rel1 { relative: 1.0 0.0; to_x: "padding.left"; to_y: "padding.bottom"; }
+					rel2 { relative: 0.0 0.0; to_x: "btn.cancel"; to_y: "padding.bottom"; }
+				}
+			}
+
+			/* Cancel */
+			part {
+				name: "rect.cancel.btn";
+				type: SPACER;
+				description {
+					state: "default" 0.0;
+					align: 1.0 1.0;
+					rel1 { to: "txt.cancel"; }
+					rel2 { to: "txt.cancel"; }
+				}
+			}
+			part {
+				name: "txt.cancel";
+				type: TEXTBLOCK;
+				scale: 1;
+				repeat_events: 1;
+				description {
+					state: "default" 0.0;
+					align: 1.0 1.0;
+					rel1 { relative: 0.0 0.0; to_x: "padding.right"; to_y: "padding.bottom"; }
+					rel2 { relative: 0.0 0.0; to_x: "padding.right"; to_y: "padding.bottom"; }
+					text {
+						style: "btn_text_style";
+						min: 1 1;
+						ellipsis: -1;
+						align: 0.5 0.5;
+						text: "CANCEL";
+					}
+				}
+			}
+			part {
+				name: "btn.cancel";
+				type: IMAGE;
+				description {
+					state: "default" 0.0;
+					align: 1.0 0.0;
+					rel1 { to: "txt.cancel"; offset: -10 0; }
+					rel2 { to: "txt.cancel"; offset: 10 0; }
+					image {
+						normal: "event_close_bg.#.png";
+					}
+					color: 100 100 100 100;
+				}
+				description {
+					state: "press" 0.0;
+					inherit: "default" 0.0;
+					color: 50 50 50 50;
+				}
+				description {
+					state: "show" 0.0;
+					inherit: "default" 0.0;
+					color: 178 178 178 178;
+				}
+			}
+			part {
+				name: "btn.cancel.block";
+				type: RECT;
+				mouse_events: 1;
+				repeat_events: 0;
+				description {
+					state: "default" 0.0;
+					rel1 { to: "btn.cancel"; }
+					rel2 { to: "btn.cancel"; }
+					color: 0 0 0 0;
+					visible: 0;
+				}
+				description {
+					state: "show" 0.0;
+					inherit: "default" 0.0;
+					visible: 1;
+				}
+			}
+		}
+		programs {
+			program {
+				signal: "btn,cancel,enable";
+				source: "prog";
+				action: STATE_SET "default" 0.0;
+				target: "btn.cancel.block";
+				target: "btn.cancel";
+			}
+			program {
+				signal: "btn,cancel,disable";
+				source: "prog";
+				action: STATE_SET "show" 0.0;
+				target: "btn.cancel.block";
+				target: "btn.cancel";
+			}
+			program {
+				name: "btn,cancel,press";
+				signal: "mouse,down,1";
+				source: "btn.cancel";
+				action: STATE_SET "press" 0.0;
+				target: "btn.cancel";
+			}
+			program {
+				name: "btn,cancel,release";
+				signal: "mouse,up,1";
+				source: "btn.cancel";
+				action: STATE_SET "default" 0.0;
+				target: "btn.cancel";
+			}
+			program {
+				name: "btn,cancel,clicked";
+				signal: "mouse,clicked,1";
+				source: "btn.cancel";
+				action: SIGNAL_EMIT "btn,cancel,clicked" "btn.cancel";
+			}
+		}
+	}
+
+	group {
+		name: "btn-return-to-call";
+		images {
+			image: "ls_icon_call.png" COMP;
+		}
+		parts {
+			part {
+				name: "bg";
+				type: SPACER;
+				description {
+					state: "default" 0.0;
+				}
+			}
+			part {
+				name: "img.call.icon";
+				type: IMAGE;
+				scale: 1;
+				description {
+					state: "default" 0.0;
+					align: 0.0 0.0;
+					min: RETURN_TO_CALL_ICON_SIZE RETURN_TO_CALL_ICON_SIZE;
+					max: RETURN_TO_CALL_ICON_SIZE RETURN_TO_CALL_ICON_SIZE;
+					rel1 { relative: 0.0 0.0; to: "bg"; }
+					rel2 { relative: 0.0 0.0; to: "bg"; }
+					image {
+						normal: "ls_icon_call.png";
+					}
+				}
+			}
+			part {
+				name: "padding.icon";
+				type: SPACER;
+				scale: 1;
+				description {
+					state: "default" 0.0;
+					align: 0.0 0.0;
+					min: 10 RETURN_TO_CALL_HEIGHT;
+					max: 10 RETURN_TO_CALL_HEIGHT;
+					rel1 { relative: 1.0 0.0; to_x: "img.call.icon"; to_y: "bg"; }
+					rel2 { relative: 1.0 1.0; to_x: "img.call.icon"; to_y: "bg"; }
+				}
+			}
+			part {
+				name: "txt.return_to_call";
+				type: TEXTBLOCK;
+				scale: 1;
+				description {
+					state: "default" 0.0;
+					align: 0.0 0.0;
+					rel1 { relative: 1.0 0.0; to_x: "padding.icon"; to_y: "bg"; }
+					rel2 { relative: 1.0 1.0; to_x: "padding.icon"; to_y: "bg"; }
+					text {
+						style: "btn_text_style";
+						min: 1 1;
+						ellipsis: -1;
+						align: 0.0 0.5;
+						text: "Return to call";
+					}
+				}
+			}
+			part {
+				name: "btn.return_to_call";
+				type: RECT;
+				mouse_events: 1;
+				scale: 1;
+				description {
+					state: "default" 0.0;
+					align: 0.0 0.0;
+					color: 0 0 0 0;
+					rel1 { relative: 0.0 0.0; to_x: "img.call.icon"; to_y: "bg"; }
+					rel2 { relative: 1.0 1.0; to_x: "txt.return_to_call"; to_y: "bg"; }
+				}
+				description {
+					state: "press" 0.0;
+					inherit: "default" 0.0;
+					color: 50 50 50 50;
+				}
+			}
+		}
+		programs {
+			program {
+				name: "btn,return_to_call,press";
+				signal: "mouse,down,1";
+				source: "btn.return_to_call";
+				action: STATE_SET "press" 0.0;
+				target: "btn.return_to_call";
+			}
+			program {
+				name: "btn,return_to_call,release";
+				signal: "mouse,up,1";
+				source: "btn.return_to_call";
+				action: STATE_SET "default" 0.0;
+				target: "btn.return_to_call";
+			}
+			program {
+				name: "btn,return_to_call,clicked";
+				signal: "mouse,clicked,1";
+				source: "btn.return_to_call";
+				action: SIGNAL_EMIT "btn,return_to_call,clicked" "btn.return_to_call";
+			}
+		}
+	}

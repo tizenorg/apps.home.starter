@@ -1,0 +1,120 @@
+/*
+ * Copyright (c) 2009-2014 Samsung Electronics Co., Ltd All Rights Reserved
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#define WIN_WIDTH 720
+#define WIN_HEIGHT 1280
+
+#define INDICATOR_HEIGHT 52
+
+/* simple password */
+#define HELP_TEXT_AREA_HEIGHT 398
+#define KEYPAD_AREA_HEIGHT 592
+#define CONTROL_AREA_HEIGHT 184
+
+#define NUMBER_PANEL_DOT_WIDTH 32
+#define NUMBER_PANEL_DOT_HEIGHT NUMBER_PANEL_DOT_WIDTH
+#define NUMBER_PANEL_PADDING_LEFT 144
+#define NUMBER_PANEL_PADDING_RIGHT NUMBER_PANEL_PADDING_LEFT
+#define NUMBER_PANEL_WIDTH 96
+#define NUMBER_PANEL_HEIGHT NUMBER_PANEL_WIDTH
+#define NUMBER_PANEL_PADDING 16
+
+#define NUMBER_KEYPAD_PANEL_WIDTH	WIN_WIDTH
+#define NUMBER_KEYPAD_PANEL_HEIGHT	WIN_HEIGHT
+#define NUMBER_KEYPAD_BUTTON_WIDTH	(WIN_WIDTH/3)
+#define NUMBER_KEYPAD_BUTTON_HEIGHT	(KEYPAD_AREA_HEIGHT/4)
+#define NUMBER_KEYPAD_BUTTON_PAD_Y	10
+
+#define NUMBER_KEYPAD_REL_W(x)         ((x)/NUMBER_KEYPAD_PANEL_WIDTH)
+#define NUMBER_KEYPAD_REL_H(y)         ((y)/NUMBER_KEYPAD_PANEL_HEIGHT)
+#define NUMBER_KEYPAD_BUTTON_REL_W(x)  ((x)/NUMBER_KEYPAD_BUTTON_WIDTH)
+#define NUMBER_KEYPAD_BUTTON_REL_H(y)  ((y)/NUMBER_KEYPAD_BUTTON_HEIGHT)
+
+#define NUMBER_KEYPAD_NUM_SIZE 72
+#define NUMBER_KEYPAD_NUM_TEXT_SIZE 29
+
+/* simple password - button pressed color */
+#define LOCK_TEXT_COLOR		245 245 245 255
+#define LOCK_TEXT_COLOR2		0 0 0 0
+#define LOCK_TEXT_COLOR3		0 0 0 178
+#define BUTTON_PRESSED_COLOR		179 179 179 179
+
+/* complex password */
+#define LINE_COLOR "AO021"
+#define LINE_SHADOW_COLOR "AO017"
+#define INFO_FONT_COLOR "ATO033"
+#define PASS_FONT_COLOR "ATO035"
+#define PASS_FONT_SIZE 43
+#define INFO_FONT_SIZE 30
+
+#define IME_RESIZED 1
+#define IME_DOWN 2
+
+#define RETURN_TO_CALL_HEIGHT 46
+#define RETURN_TO_CALL_ICON_SIZE 46
+
+
+collections {
+	base_scale: 2.6;
+
+#include "lock_pwd_simple.edc"
+#include "lock_pwd_complex.edc"
+#include "lock_pwd_control_panel.edc"
+
+	group {
+		name: "lock_pwd";
+		parts {
+			part {
+				name: "bg";
+				type: SPACER;
+				description {
+					state: "default" 0.0;
+					rel1 { relative: 0.0 0.0; }
+					rel2 { relative: 1.0 1.0; }
+				}
+			}
+			part {
+				name: "sw.bg";
+				type: SWALLOW;
+				description {
+					state: "default" 0.0;
+					rel1 { to: "bg"; }
+					rel2 { to: "bg"; }
+				}
+			}
+			part {
+				name: "dim.bg";
+				type: RECT;
+				description {
+					state: "default" 0.0;
+					color: 20 20 20 100;
+					rel1 { to: "bg"; }
+					rel2 { to: "bg"; }
+				}
+			}
+			part {
+				name: "sw.lock_pwd";
+				type: SWALLOW;
+				description {
+					state: "default" 0.0;
+					rel1 { to: "bg"; }
+					rel2 { to: "bg"; }
+				}
+			}
+		}
+	}
+
+}

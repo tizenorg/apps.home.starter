@@ -1,0 +1,168 @@
+/*
+ * Copyright (c) 2009-2014 Samsung Electronics Co., Ltd All Rights Reserved
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+styles {
+	style {
+		name: "style_complex_title";
+		base: "font=Tizen:style=Regular color=#ffffffff color_class=ATO033 font_size=40 wrap=mixed align=center style=shadow shadow_color=#000000bf text_class=ATO033";
+		tag: "br" "\n";
+		tag: "hilight" "+ color=#ffff";
+		tag: "b" "+ color=#ffff";
+		tag: "tab" "\t";
+	}
+}
+
+	group {
+		name: "lock-complex-password";
+		images {
+			image: "ls_password_underline.#.png" COMP;
+		}
+		parts {
+			part {
+				name: "bg";
+				type: SPACER;
+				description {
+					state: "default" 0.0;
+				}
+			}
+			part {
+				name: "padding.top.title";
+				type: SPACER;
+				scale: 1;
+				description {
+					state: "default" 0.0;
+					min: WIN_WIDTH 153;
+					max: WIN_WIDTH 153;
+					fixed: 1 1;
+					align: 0.5 0.0;
+				}
+			}
+			part {
+				name: "title";
+				type: TEXTBLOCK;
+				scale: 1;
+				effect: "SHADOW";
+				description {
+					state: "default" 0.0;
+					rel1 { relative: 0.0 1.0; to: "padding.top.title"; }
+					rel2 { relative: 1.0 1.0; to: "padding.top.title"; }
+					align: 0.5 0.0;
+					fixed: 1 1;
+					color_class: "ATO033";
+					text {
+						style: "style_simple_title";
+						min: 0 1;
+						align: 0.5 0.5;
+						text: "Enter PIN";
+					}
+				}
+				description {
+					state: "show_title" 0.0;
+					inherit: "default" 0.0;
+					visible: 1;
+				}
+				description {
+					state: "hide_title" 0.0;
+					inherit: "default" 0.0;
+					visible: 0;
+				}
+			}
+			part {
+				name: "padding.top.entry";
+				type: SPACER;
+				scale: 1;
+				description {
+					state: "default" 0.0;
+					align: 0.5 0.0;
+					rel1 { relative: 0.0 0.0; to: "bg"; }
+					rel2 { relative: 1.0 0.0; to: "bg"; }
+					min: WIN_WIDTH (INDICATOR_HEIGHT+232);
+					max: WIN_WIDTH (INDICATOR_HEIGHT+232);
+					fixed: 1 1;
+				}
+		  }
+		  part {
+				name: "entry";
+				type: SWALLOW;
+				scale: 1;
+				description {
+					state: "default" 0.0;
+					rel1 { relative: 0.0 1.0; to : "padding.top.entry"; }
+					rel2 { relative: 1.0 1.0; to : "padding.top.entry"; }
+					min: (WIN_WIDTH-32-32) 70;
+					max: (WIN_WIDTH-32-32) 70;
+					fixed: 1 1;
+					align: 0.5 0.0;
+				}
+			}
+			part {
+				name: "underline";
+				type: IMAGE;
+				scale: 1;
+				description {
+					state: "default" 0.0;
+					fixed: 1 1;
+					rel1 { relative: 0.0 1.0; to: "entry"; offset: 0 10;}
+					rel2 { relative: 1.0 1.0; to: "entry"; offset: 0 10;}
+					min: 0 4;
+					max: -1 4;
+					image.normal: "ls_password_underline.#.png";
+				}
+			}
+			/* Bottom : changed by IME height */
+			part {
+				name: "spacer.bottom";
+				type: SPACER;
+				scale: 1;
+				description {
+					state: "default" 0.0;
+					min: WIN_WIDTH CONTROL_AREA_HEIGHT;
+					max: WIN_WIDTH CONTROL_AREA_HEIGHT;
+					fixed: 1 1;
+					align: 0.5 1.0;
+					rel1 { relative: 0.0 1.0; to: "bg"; }
+					rel2 { relative: 1.0 1.0; to: "bg"; }
+				}
+			}
+			part {
+				name: "control_panel";
+				type: SWALLOW;
+				scale: 1;
+				description {
+					state: "default" 0.0;
+					align: 0.5 0.0;
+					rel1 { relative: 0.0 0.0; to: "spacer.bottom"; }
+					rel2 { relative: 1.0 1.0; to: "spacer.bottom"; }
+				}
+			}
+		} //parts
+		programs {
+			program {
+				name: "show.title";
+				signal: "show_title";
+				action: STATE_SET "show_title" 0.0;
+				source: "title";
+				target: "title";
+			}
+			program {
+				name: "hide.title";
+				signal: "hide_title";
+				action: STATE_SET "hide_title" 0.0;
+				source: "title";
+				target: "title";
+			}
+		} //programs
+	} //gorup

@@ -1,14 +1,16 @@
 [Unit]
 Description=Start the "starter" program
-After=wm_ready.service ac.service system-server.service launchpad-preload.service
-
+Requires=starter-pre.service
+After=starter-pre.service wm_ready.service ac.service deviced.service launchpad-preload.service
 
 [Service]
-Type=forking
-ExecStart=/etc/init.d/rd3starter
+ExecStart=/usr/bin/starter
 Restart=always
 RestartSec=0
 KillSignal=SIGKILL
+User=system
+Group=system
+SmackProcessLabel=starter
 
 [Install]
 WantedBy=tizen-system.target
